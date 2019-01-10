@@ -1,33 +1,49 @@
 const sequelize = require('../index.js');
 
 //建立对象和数据映射关系
-var asset = sequelize.define('Asset', {
-  asset_id: {
+var charge = sequelize.define('Charge', {
+  charge_id: {
     type: Sequelize.STRING(36), //数据类型
-    field: 'AssetId',// 数据库字段名
+    field: 'ChargeId',// 数据库字段名
     primaryKey: true,  //是否为主键
     allowNull: false, //是否允许为NULL
     defaultValue: require('uuid/v4')() //设置默认值
   },
-  code: {
+  charge_code: {
     type: Sequelize.INTEGER,
-    field: 'Code',
+    field: 'ChargeCode',
     allowNull: false
   },
-  belong_type: {
+  charge_type: {
     type: Sequelize.INTEGER,
-    field: 'BelongType',
-    allowNull: false 
+    field: 'ChargeType',
+    allowNull: false
+  },  
+  charge_for_code: {
+    type: Sequelize.INTEGER,
+    field: 'ChargeForCode',
+    allowNull: false
   },
-  is_credit_class: {
+  spending_type:{
+    type: Sequelize.INTEGER,
+    field: 'ChargeType',
+    allowNull: false
+  },
+  is_fix_before:{
     type: Sequelize.BOOLEAN,
-    field: 'IsCreditClass',
+    field: 'IsFixBefore',
     allowNull: false,
     defaultValue: 0
   },
-  profit: {
+  is_flexible_spending: {
+    type: Sequelize.BOOLEAN,
+    field: 'IsFlexibleSpending',
+    allowNull: false,
+    defaultValue: 0
+  },  
+  count: {
     type: Sequelize.FLOAT(10),
-    field: 'Profit',
+    field: 'Count',
     allowNull: false,
     defaultValue: 0.0
   },
@@ -43,6 +59,6 @@ var asset = sequelize.define('Asset', {
     updatedAt: false
   });
 
-asset.sync();
+charge.sync();
 
-module.exports = { asset };
+module.exports = { charge };

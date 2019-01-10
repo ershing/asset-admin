@@ -1,17 +1,4 @@
-var Sequelize = require('sequelize');
-var db = require('../../config/db.js');
-
-//连接数据库
-var sequelize = new Sequelize(
-  db.name, //数据库名称
-  apibase.config.mysql.user, //用户名
-  apibase.config.mysql.password, //密码
-  {
-    "dialect": db.dialect,
-    "host": apibase.config.mysql.host,
-    "port": apibase.config.mysql.port
-  }//数据库信息
-);
+const sequelize = require('../index.js');
 
 //建立对象和数据映射关系
 var account = sequelize.define('Account', {
@@ -48,59 +35,4 @@ var account = sequelize.define('Account', {
 
 account.sync();
 
-//创建或更新数据操作 
-function upsert(rowInfo, callback) {
-  //同步数据 
-  account.sync().then(function () {
-    account.upsert(rowInfo).then(function (result) {
-      // 创建结果
-      callback(null, result);
-    }).catch(function (err) {
-      callback(err, null);
-    })
-  });
-}
-
-
-//查找一项数据
-function findOne(info, callback) {
-  //同步数据            用于初始化清除列表数据在sync()中加入：{force: true}
-  account.sync().then(function () {
-    account.findOne({ where: info }).then(function (result) {
-      callback(null, result);
-    }).catch(function (err) {
-      callback(err, null);
-    });
-  });
-}
-
-//查找所有数据
-function findAll(rowInfo, callback) {
-  //同步数据            用于初始化清除列表数据在sync()中加入：{force: true}
-  account.sync().then(function () {
-    account.findAll(rowInfo).then(function (result) {
-      callback(null, result);
-    }).catch(function (err) {
-      callback(err, null);
-    });
-  });
-}
-
-//查找并统计所有数据
-function findAndCountAll(rowInfo, callback) {
-  //同步数据            用于初始化清除列表数据在sync()中加入：{force: true}
-  account.sync().then(function () {
-    account.findAndCountAll(rowInfo).then(function (result) {
-      callback(null, result);
-    }).catch(function (err) {
-      callback(err, null);
-    });
-  });
-}
-
-module.exports = {
-  "upsert": upsert,
-  "get": findOne,
-  "getAll": findAll,
-  "findAndCountAll": findAndCountAll
-};
+module.exports = { account };

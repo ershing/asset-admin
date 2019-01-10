@@ -1,28 +1,43 @@
 const sequelize = require('../index.js');
 
 //建立对象和数据映射关系
-var dict = sequelize.define('Dict', {
-  dict_id: {
+var plan = sequelize.define('Plan', {
+  plan_id: {
     type: Sequelize.STRING(36), //数据类型
-    field: 'DictId',// 数据库字段名
+    field: 'PlanId',// 数据库字段名
     primaryKey: true,  //是否为主键
     allowNull: false, //是否允许为NULL
     defaultValue: require('uuid/v4')() //设置默认值
   },
-  dict_name: {
+  plan_name: {
     type: Sequelize.STRING(30),
-    field: 'DictName',
+    field: 'PlanName',
     allowNull: false 
-  },  
-  code: {
+  }, 
+  status: {
     type: Sequelize.INTEGER,
-    field: 'Code',
+    field: 'ChargeCode',
+    allowNull: false
+  }, 
+  charge_code: {
+    type: Sequelize.INTEGER,
+    field: 'ChargeCode',
     allowNull: false
   },
-  value: {
-    type: Sequelize.STRING(30),
-    field: 'Value',
-    allowNull: false 
+  charge_type: {
+    type: Sequelize.INTEGER,
+    field: 'ChargeType',
+    allowNull: false
+  },  
+  charge_for_code: { 
+    type: Sequelize.INTEGER,
+    field: 'ChargeForCode',
+    allowNull: false
+  },
+  periodType: {
+    type: Sequelize.INTEGER,
+    field: 'ChargeCode',
+    allowNull: false    
   },
   create_time: {
     type: Sequelize.DATE,
@@ -36,6 +51,6 @@ var dict = sequelize.define('Dict', {
     updatedAt: false
   });
 
-dict.sync();
+plan.sync();
 
-module.exports = { dict };
+module.exports = { plan };
