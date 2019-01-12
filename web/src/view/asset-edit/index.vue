@@ -16,13 +16,26 @@
         <FormItem label="资产名称">
           <Input v-model="modalForm.input" placeholder="请输入" style="width: 200px"></Input>
         </FormItem>
-        <FormItem label="所属分类">
+        <FormItem label="所属载体">
           <Select v-model="modalForm.select" style="width: 200px">
             <Option value="beijing">New York</Option>
             <Option value="shanghai">London</Option>
             <Option value="shenzhen">Sydney</Option>
           </Select>
         </FormItem>
+        <FormItem label="信用卡类">
+            <i-switch v-model="modalForm.switch" size="large">
+                <span slot="open">是</span>
+                <span slot="close">否</span>
+            </i-switch>
+        </FormItem>        
+        <FormItem label="具体模块">
+          <Select v-model="modalForm.select" style="width: 200px">
+            <Option value="beijing">New York</Option>
+            <Option value="shanghai">London</Option>
+            <Option value="shenzhen">Sydney</Option>
+          </Select>
+        </FormItem>        
         <FormItem label="资金总和">
           <Input
             v-model="value15"
@@ -70,12 +83,22 @@ export default {
           key: "asset"
         },
         {
-          title: "所属分类",
+          title: "所属载体",
           align: "center",
           key: "belong_type"
         },
         {
-          title: "资金总和",
+          title: "信用卡类",
+          align: "center",
+          key: "belong_type"
+        },
+        {
+          title: "具体模块",
+          align: "center",
+          key: "belong_type"
+        },                
+        {
+          title: "资金余额",
           align: "center",
           key: "profit",
           render: (h, params) => {

@@ -70,24 +70,33 @@ export default [
         component: () => import('@/view/asset-edit')
       },
       {
-        path: 'edit',
-        name: '资产管理',
+        path: 'classify',
+        name: '资产分类',
         meta: {
           icon: '_qq',
-          title: '资产管理'
+          title: '资产分类'
         },
-        component: () => import('@/view/asset-edit')
-      }      
+        component: () => import('@/view/asset-classify')
+      },
+      {
+        path: 'edit',
+        name: '支出分类',
+        meta: {
+          icon: '_qq',
+          title: '支出分类'
+        },
+        component: () => import('@/view/spending-classify')
+      }            
     ]
   },
   {
     path: '/charge',
-    name: '账单管理',
+    name: '记账管理',
     component: Main,
     meta: {
       hideInBread: true,
       icon: '_qq',
-      title: '账单管理'
+      title: '记账管理'
     },
     children: [
       {
@@ -96,17 +105,17 @@ export default [
         meta: {
           icon: '_qq',
           title: '记账列表'
-        },
-        component: () => import('@/view/asset-edit')
+        },  
+        component: () => import('@/view/charge-list')
       },
       {
-        path: 'edit',
-        name: '定期记账',
+        path: 'regular',
+        name: '记账计划',
         meta: {
           icon: '_qq',
-          title: '定期记账'
+          title: '记账计划'
         },
-        component: () => import('@/view/asset-edit')
+        component: () => import('@/view/regular-charge')
       },
       {
         path: 'edit',
@@ -115,7 +124,46 @@ export default [
           icon: '_qq',
           title: '未来账单'
         },
-        component: () => import('@/view/asset-edit')
+        component: () => import('@/view/future-charge')
+      }      
+    ]
+  },
+  {
+    path: '/chart',
+    name: '统计图表',
+    component: Main,
+    meta: {
+      hideInBread: true,
+      icon: '_qq',
+      title: '统计图表'
+    },
+    children: [
+      {
+        path: 'overview',
+        name: '收支概览',
+        meta: {
+          icon: '_qq',
+          title: '收支概览'
+        },  
+        component: () => import('@/view/chart-overview')
+      },
+      {
+        path: 'asset-proportion',
+        name: '资产占比',
+        meta: {
+          icon: '_qq',
+          title: '资产占比'
+        },
+        component: () => import('@/view/asset-proportion')
+      },
+      {
+        path: 'spending-proportion',
+        name: '支出占比',
+        meta: {
+          icon: '_qq',
+          title: '支出占比'
+        },
+        component: () => import('@/view/spending-proportion')
       }      
     ]
   }  

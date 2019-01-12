@@ -8,11 +8,14 @@
 <template>
   <div>
     <header class="ctr-header">
-      <Button type="primary" @click="modalVisible = true">记账</Button>
+      <Button type="primary" @click="modalVisible = true">新增</Button>
     </header>
     <Table :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle">
       <Form :model="modalForm" :label-width="80">
+        <FormItem label="计划名称">
+          <Input v-model="modalForm.input" placeholder="请输入" style="width: 200px"></Input>
+        </FormItem>            
         <FormItem label="操作资产">
           <Select v-model="modalForm.select" style="width: 200px">
             <Option value="beijing">New York</Option>
@@ -42,23 +45,27 @@
             style="width: 200px"
           />
         </FormItem>
-        <FormItem label="对应时间">
+        <FormItem label="记账周日">
+          <Select v-model="modalForm.select" style="width: 200px">
+            <Option value="beijing">New York</Option>
+            <Option value="shanghai">London</Option>
+            <Option value="shenzhen">Sydney</Option>
+          </Select>
+        </FormItem>     
+        <FormItem label="开始时间">
           <DatePicker
             type="date"
             placeholder="Select date"
             v-model="modalForm.date"
             style="width: 200px"
           ></DatePicker>
-        </FormItem>
+        </FormItem>      
         <FormItem label="固弹支出">
             <i-switch v-model="modalForm.switch" size="large">
                 <span slot="open">固定</span>
                 <span slot="close">弹性</span>
             </i-switch>
-        </FormItem>       
-        <FormItem label="记账备注">
-          <Input v-model="modalForm.input" placeholder="请输入" style="width: 200px"></Input>
-        </FormItem>        
+        </FormItem>                  
       </Form>
     </Modal>
   </div>
@@ -69,7 +76,7 @@ export default {
   name: "AssetEdit",
   data() {
     return {
-      modalTitle: "记账",
+      modalTitle: "新增记账计划",
       modalVisible: false,
       options: {
         trigger: ".ivu-modal-header",
@@ -84,6 +91,11 @@ export default {
           align: "center",
           title: "序号"
         },
+        {
+          title: "计划名称",
+          align: "center",
+          key: "asset"
+        },         
         {
           title: "操作资产",
           align: "center",
@@ -108,18 +120,21 @@ export default {
           }
         },
         {
-          title: "对应时间",
+          title: "记账周期",
           align: "center",
           key: "profit",
           render: (h, params) => {
             return h("span", "￥" + params.row.profit);
           }
-        },        
+        },   
         {
-          title: "记账备注",
+          title: "开始时间",
           align: "center",
-          key: "asset"
-        },        
+          key: "profit",
+          render: (h, params) => {
+            return h("span", "￥" + params.row.profit);
+          }
+        },                             
         {
           title: "操作",
           align: "center",
