@@ -1,18 +1,30 @@
 <template>
   <div>
+    <header style="marginBottom:10px;">
+      <Input v-model="value" placeholder="请输入新增的分类" style="width:200px;marginRight:10px;"></Input>
+      <Button type="success" @click="createClass">新增</Button>
+    </header>
+    <section style="marginBottom:10px;">
+      <Tag color="cyan" closable>success</Tag>
+    </section>
     <Card>
       <div class="drag-box-card">
-        <!-- 切记设置list1和list2属性时，一定要添加.sync修饰符 -->
+        <!-- 切记设置assetList和putList属性时，一定要添加.sync修饰符 -->
         <drag-list
-          :list1.sync="list1"
-          :list2.sync="list2"
-          :list3.sync="list3"
+          :assetList.sync="assetList"
+          :putList.sync="putList"
           :dropConClass="dropConClass"
           @on-change="handleChange"
         >
-          <h3 slot="left-title">待办事项</h3>
+          <h3 slot="left-title">资产列表</h3>
           <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.name }}</Card>
-          <h3 slot="right-title">完成事项</h3>
+          <h3 slot="right-title">分类：
+            <Select v-model="belong_supporter" style="width: 200px">
+              <Option value="beijing">New York</Option>
+              <Option value="shanghai">London</Option>
+              <Option value="shenzhen">Sydney</Option>
+            </Select>
+          </h3>
           <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.name }}</Card>
         </drag-list>
       </div>
@@ -21,34 +33,35 @@
 </template>
 <script>
 import DragList from "_c/drag-list";
-import { getDragList } from "@/api/data";
 export default {
-  name: "drag_list_page",
+  name: "AssetClassify",
   components: {
     DragList
   },
   data() {
     return {
-      list1: [],
-      list2: [],
-      list3: [],
+      dict_name: "ASSET_CLASSIFY",
+      code: 1,
+      value: "",
+      //标签集合
+      classList: [],
+      assetList: [],
+      putList: [],
       dropConClass: {
         left: ["drop-box", "left-drop-box"],
-        right: ["drop-box", "right-drop-box"],
-        right2: ["drop-box", "right-drop-box"]
+        right: ["drop-box", "right-drop-box"]
       },
       handleList: []
     };
   },
   methods: {
-    handleChange({ src, target, oldIndex, newIndex }) {
-      this.handleList.push(`${src} => ${target}, ${oldIndex} => ${newIndex}`);
-    }
+    handleChange({ src, target, oldIndex, newIndex }) {},
+    createClass() {}
   },
   mounted() {
     getDragList().then(res => {
-      this.list1 = res.data;
-      this.list2 = [res.data[0]];
+      this.assetList = res.data;
+      this.putList = [res.data[0]];
     });
   }
 };
@@ -56,12 +69,15 @@ export default {
 <style lang="less">
 .drag-box-card {
   display: inline-block;
-  width: 600px;
+  // width: 600px;
+  width: 100%;
   height: 560px;
   .drag-item {
     margin: 10px;
   }
   h3 {
+    height: 52px;
+    line-height: 30px;
     padding: 10px 15px;
   }
   .drop-box {
@@ -76,33 +92,5 @@ export default {
     //
 
   }
-}
-.handle-log-box {
-  display: inline-block;
-  margin-left: 20px;
-  border: 1px solid #eeeeee;
-  vertical-align: top;
-  width: 200px;
-  height: 500px;
-  h3 {
-    padding: 10px 14px;
-  }
-  .handle-inner-box {
-    height: ~"calc(100% - 44px)";
-    overflow: auto;
-    p {
-      padding: 14px 0;
-      margin: 0 14px;
-      border-bottom: 1px dashed #eeeeee;
-    }
-  }
-}
-.res-show-box {
-  display: inline-block;
-  margin-left: 20px;
-  border: 1px solid #eeeeee;
-  vertical-align: top;
-  width: 350px;
-  height: 570px;
 }
 </style>

@@ -4,8 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.4.0",
+    "nodemon": "^1.18.9",
+    "password-slow-hash": "^1.0.41",
+    "sequelize": "^4.42.0",
+    "sqlite3": "^4.0.6",
+    "uuid": "^3.3.2"
+  }
 }

@@ -64,6 +64,7 @@
 </template>
 
 <script>
+
 export default {
   name: "AssetEdit",
   data() {
@@ -118,7 +119,15 @@ export default {
           render: (h, params) => {
             return h("span", "￥" + params.row.profit);
           }
-        },                             
+        },
+        {
+          title: "固弹支出",
+          align: "center",
+          key: "profit",
+          render: (h, params) => {
+            return h("span", "￥" + params.row.profit);
+          }
+        },                                      
         {
           title: "操作",
           align: "center",

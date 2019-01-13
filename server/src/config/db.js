@@ -1,8 +1,11 @@
+const path = require('path');
+
 module.exports = {
    name: '',
-   dialect: '',
-   host: '',
-   port: '',
    user: '',
-   pwd: ' '
+   password: '',   
+   dialect: 'sqlite',
+   host: 'localhost',
+   port: '',
+   storage: path.join(__dirname,'../../database/save.sqlite')
 }

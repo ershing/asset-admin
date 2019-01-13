@@ -16,9 +16,9 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 app.use(require('./src/router.js'));
 
 app.use(function (err, req, res, next) {
-    // 带有四个参数的 middleware 专门用来处理异常
     var resObj = {
-        desc: "系统错误" + err.message
+        statue: 0,
+        msg: "系统错误" + err.message
     };
     res.status(500).send(resObj);
 });
