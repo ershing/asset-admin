@@ -1,16 +1,11 @@
 const charge = require('../../models/charge');
-const uuid = require('uuid/v4');
 
 module.exports = (req, res) => {
     var addData = {
-        charge_name,
-        op_asset_id,
-        charge_type,
-        target_id,
-        count,
-        charge_type,
-        begin_time,
-        is_flexible_spending
+      id,
+      dict_name,
+      code,
+      value
     } = req.body
     for (let key in addData) {
         if (addData[key] === undefined || addData[key] === null || addData[key] === '' || addData[key] === 0)
@@ -20,10 +15,9 @@ module.exports = (req, res) => {
             })
     }
     addData.create_time = Date.parse(new Date());
-    addData.is_plan = 1;
-    addData.charge_id = req.body.charge_id || uuid();
+    addData.id = req.body.id || uuid();
     addData.account_id =  req.body.charge_id || uuid();
-    charge.upsert(addData).then(data => {
+    charge.update(addData).then(data => {
         res.send({
             status: 1
         })

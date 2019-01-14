@@ -88,3 +88,13 @@ const periodTypeDict = [
   { code: 5, value: '工作日' },
   { code: 5, value: '节假日' },
 ]
+
+module.exports = {
+  supporterDict,
+  creditModuleDict,
+  moduleDict,
+  earnTargetDict,
+  spendingTargetDict,
+  chargeTypeDict,
+  periodTypeDict
+}

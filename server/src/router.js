@@ -31,4 +31,7 @@ router.post('/regular-charge/upsert',require('./controllers/regular-charge/upser
 //删除定期记账
 router.post('/regular-charge/delete',require('./controllers/regular-charge/delete.js'));
 
+//获取所有基础字典
+router.get('/dict/all-base',require('./controllers/dict/allBase.js'));
+
 module.exports = router;
