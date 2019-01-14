@@ -18,18 +18,17 @@ var dict = sequelize.define('Dict', {
     allowNull: false,
     defaultValue: 0
   },
-  account_id:{
+  account_id: {
     type: Sequelize.STRING(36),
     field: 'AccountId',
-    unique: true, 
+    unique: true,
     allowNull: true,
-  }, 
+  },
   dict_name: {
     type: Sequelize.STRING(30),
     field: 'DictName',
-    allowNull: false ,
-    unique: true
-  },  
+    allowNull: false
+  },
   code: {
     type: Sequelize.INTEGER,
     field: 'Code',
@@ -38,7 +37,7 @@ var dict = sequelize.define('Dict', {
   value: {
     type: Sequelize.STRING(30),
     field: 'Value',
-    allowNull: false 
+    allowNull: false
   },
   classify_id: {
     type: Sequelize.INTEGER,
@@ -54,33 +53,39 @@ var dict = sequelize.define('Dict', {
       return moment(this.getDataValue('create_time')).format('YYYY-MM-DD HH:mm:ss');
     }
   },
-  is_delete:{
+  is_delete: {
     type: Sequelize.BOOLEAN,
     field: 'IsDelete',
     allowNull: false,
     defaultValue: 0
   }
 }, {
-    freezeTableName: true, 
+    freezeTableName: true,
     createdAt: false,
     updatedAt: false
   });
 
 dict.sync().then(() => {
-  var insertData = []
-  var create_time = Date.parse(new Date())
-  for(let key in config){
-    var format = config[key].map(ele => ({
-      id: uuid(),
-      is_base: 1,
-      dict_name: key,
-      code: ele.code,
-      value: ele.value,
-      create_time
-    }))
-    insertData.push(...format)
-  }
-  dict.bulkCreate(insertData)
+  dict.findAll().then(res => {
+    if (!res.length) {
+      var insertData = []
+      var create_time = Date.parse(new Date())
+      for (let key in config) {
+        var format = config[key].map(ele => ({
+          id: uuid(),
+          is_base: 1,
+          dict_name: key,
+          code: ele.code,
+          value: ele.value,
+          create_time
+        }))
+        insertData.push(...format)
+      }
+      dict.bulkCreate(insertData).catch(e => {
+        console.log(e)
+      })
+    }
+  })
 });
 
-module.exports =  dict ;
+module.exports = dict;

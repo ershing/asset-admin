@@ -11,6 +11,7 @@ module.exports = (req, res) => {
         charge_time,
         is_flexible_spending
     } = req.body
+    console.log(addData)
     for (let key in addData) {
         if (addData[key] === undefined || addData[key] === null || addData[key] === '' || addData[key] === 0)
             return res.send({

@@ -1,5 +1,6 @@
 <style>
 .ctr-header {
+  overflow: hidden;
   margin-bottom: 10px;
 }
 </style>
@@ -8,126 +9,158 @@
 <template>
   <div>
     <header class="ctr-header">
-          <DatePicker
-            type="date"
-            placeholder="Select date"
-            v-model="modalForm.date"
-            style="width: 200px"
-          ></DatePicker>
+      <DatePicker
+        v-model="selected_time"
+        type="daterange"
+        placement="bottom-end"
+        placeholder="选择时间范围"
+        style="float: right;width: 200px"
+        :options="datePickerOptions"
+        @on-change="changeSelectedTime"
+      ></DatePicker>
     </header>
     <Table :columns="columns" :data="data"></Table>
-    <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle">
-      <Form :model="modalForm" :label-width="80">           
+    <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
+      <Form :model="modalForm" :label-width="80">
         <FormItem label="操作资产">
-          <Select v-model="modalForm.select" style="width: 200px">
-            <Option value="beijing">New York</Option>
-            <Option value="shanghai">London</Option>
-            <Option value="shenzhen">Sydney</Option>
+          <Select v-model="modalForm.op_asset_id" style="width: 200px">
+            <Option :value="3">New York</Option>
+            <Option :value="1">London</Option>
+            <Option :value="2">Sydney</Option>
           </Select>
         </FormItem>
         <FormItem label="操作方式">
-          <Select v-model="modalForm.select" style="width: 200px">
-            <Option value="beijing">New York</Option>
-            <Option value="shanghai">London</Option>
-            <Option value="shenzhen">Sydney</Option>
+          <Select v-model="modalForm.charge_type" style="width: 200px">
+            <Option :value="3">New York</Option>
+            <Option :value="1">London</Option>
+            <Option :value="2">Sydney</Option>
           </Select>
-        </FormItem>  
+        </FormItem>
         <FormItem label="操作目标">
-          <Select v-model="modalForm.select" style="width: 200px">
-            <Option value="beijing">New York</Option>
-            <Option value="shanghai">London</Option>
-            <Option value="shenzhen">Sydney</Option>
+          <Select v-model="modalForm.target_id" style="width: 200px">
+            <Option :value="3">New York</Option>
+            <Option :value="1">London</Option>
+            <Option :value="2">Sydney</Option>
           </Select>
-        </FormItem>                
+        </FormItem>
         <FormItem label="资金总量">
           <Input
-            v-model="value15"
+            v-model="modalForm.count"
             prefix="logo-usd"
             placeholder="Enter number"
             style="width: 200px"
           />
         </FormItem>
-        <FormItem label="计划名称">
-          <Input v-model="modalForm.input" placeholder="请输入" style="width: 200px"></Input>
-        </FormItem>     
+        <FormItem label="记账来源">
+          <Input v-model="modalForm.charge_name" placeholder="请输入" style="width: 200px"></Input>
+        </FormItem>
         <FormItem label="记账时间">
           <DatePicker
             type="date"
             placeholder="Select date"
-            v-model="modalForm.date"
+            v-model="modalForm.charge_time"
             style="width: 200px"
           ></DatePicker>
-        </FormItem>               
+        </FormItem>
+        <FormItem label="固弹支出">
+          <i-switch v-model="modalForm.is_flexible_spending" size="large">
+            <span slot="open">弹性</span>
+            <span slot="close">固定</span>
+          </i-switch>
+        </FormItem>
       </Form>
     </Modal>
+    <Modal
+      v-draggable="options"
+      v-model="confirmDeleteVisible"
+      title="警告"
+      @on-ok="confirmDelete"
+    >是否确认删除记账数据？</Modal>
   </div>
 </template>
 
 <script>
-
+import { getCharge, upsertCharge, deleteCharge } from "@/api/base";
 export default {
   name: "AssetEdit",
   data() {
     return {
-      modalTitle: "新增记账计划",
+      modalTitle: "修改记账",
       modalVisible: false,
+      confirmDeleteVisible: false,
+      deleteParams: {},
+      selected_time: [],
       options: {
         trigger: ".ivu-modal-header",
         body: ".ivu-modal",
         recover: true
       },
-      modalForm: {},
+      datePickerOptions: {
+        disabledDate(date) {
+          return date && date.valueOf() < Date.now() - 86399000;
+        }
+      },
+      modalForm: {
+        charge_name: "",
+        op_asset_id: 0,
+        charge_type: 0,
+        target_id: 0,
+        count: 0,
+        charge_time: new Date(),
+        is_flexible_spending: false
+      },
       columns: [
         {
           type: "index",
           width: 60,
           align: "center",
           title: "序号"
-        },       
+        },
         {
           title: "操作资产",
           align: "center",
-          key: "asset"
-        },        
+          key: "op_asset_id"
+        },
         {
           title: "操作方式",
           align: "center",
-          key: "belong_type"
+          key: "charge_type"
         },
         {
           title: "操作目标",
           align: "center",
-          key: "asset"
-        },          
+          key: "target_id"
+        },
         {
           title: "资金总量",
           align: "center",
-          key: "profit",
+          key: "count",
           render: (h, params) => {
-            return h("span", "￥" + params.row.profit);
+            return h("span", "￥" + params.row.count);
           }
         },
         {
           title: "记账来源",
           align: "center",
-          key: "asset"
-        },  
+          key: "charge_name"
+        },
         {
           title: "记账时间",
           align: "center",
-          key: "profit",
+          key: "charge_time",
           render: (h, params) => {
-            return h("span", "￥" + params.row.profit);
+            var times = params.row.charge_time.split(" ");
+            return h("span", times[0]);
           }
         },
         {
           title: "固弹支出",
           align: "center",
-          key: "profit",
+          key: "is_flexible_spending",
           render: (h, params) => {
-            return h("span", "￥" + params.row.profit);
+            return h("span", params.row.is_flexible_spending ? "弹性" : "固定");
           }
-        },                                      
+        },
         {
           title: "操作",
           align: "center",
@@ -138,10 +171,15 @@ export default {
                 {
                   props: {
                     type: "success",
-                    size: 'small'
+                    size: "small"
                   },
                   style: {
                     marginRight: "10px"
+                  },
+                  on: {
+                    click: () => {
+                      this.editModal(params);
+                    }
                   }
                 },
                 "编辑"
@@ -151,7 +189,12 @@ export default {
                 {
                   props: {
                     type: "error",
-                    size:'small'
+                    size: "small"
+                  },
+                  on: {
+                    click: () => {
+                      this.deleteCharge(params);
+                    }
                   }
                 },
                 "删除"
@@ -160,15 +203,92 @@ export default {
           }
         }
       ],
-      data: [
-        {
-          belong_type: 1,
-          profit: 12313.12
-        }
-      ]
+      data: []
     };
   },
-  mounted() {},
-  methods: {}
+  mounted() {
+    this.initSelectedTime();
+    this.formatTimeSearch();
+  },
+  methods: {
+    initSelectedTime() {
+      var date = new Date();
+      var firstDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+      var today = new Date(
+        Date.parse(
+          new Date(
+            date.getMonth() === 11
+              ? date.getFullYear() + 1
+              : date.getFullYear(),
+            date.getMonth() === 11 ? 1 : date.getMonth() + 1,
+            1
+          )
+        ) - 1000
+      );
+      this.selected_time = [firstDate, today];
+    },
+    changeSelectedTime(val) {
+      this.formatTimeSearch();
+    },
+    formatTimeSearch() {
+      var start_charge_time = Date.parse(this.selected_time[0]);
+      var end_charge_time = Date.parse(this.selected_time[1]);
+      this.getChargeList({ start_charge_time, end_charge_time });
+    },
+    getChargeList(params) {
+      getCharge(params).then(res => {
+        if (res.data.status) {
+          this.data = res.data.data || [];
+        }
+      });
+    },
+    resetModal() {
+      this.modalForm = {
+        charge_name: "",
+        op_asset_id: 0,
+        charge_type: 0,
+        target_id: 0,
+        count: 0,
+        charge_time: new Date(),
+        is_flexible_spending: false
+      };
+    },
+    editModal(params) {
+      Object.assign(this.modalForm, params.row);
+      this.modalEditType = 1;
+      this.modalVisible = true;
+    },
+    confirmModal() {
+      var insertData = { ...this.modalForm };
+      insertData.charge_time = Date.parse(insertData.charge_time);
+      delete insertData._index;
+      delete insertData._rowKey;
+      upsertCharge(insertData).then(res => {
+        if (res.data.status) {
+          this.$Message.success(this.modalTitle + "成功！");
+          this.formatTimeSearch();
+        } else {
+          this.$Message.error(this.modalTitle + "失败！");
+        }
+      });
+    },
+    confirmDelete() {
+      var params = this.deleteParams;
+      deleteCharge({ charge_id: params.row.charge_id }).then(res => {
+        if (res.data.status) {
+          this.$Message.success(params.row.charge_name + "删除成功！");
+          this.formatTimeSearch();
+        }
+      });
+    },
+    deleteCharge(params) {
+      this.confirmDeleteVisible = true;
+      this.deleteParams = params;
+    }
+  }
 };
 </script>

@@ -15,6 +15,7 @@
         placement="bottom-end"
         placeholder="选择时间范围"
         style="float: right;width: 200px"
+        :options="datePickerOptions"
         @on-change="changeSelectedTime"
       ></DatePicker>
     </header>
@@ -69,8 +70,8 @@
         </FormItem>
         <FormItem label="固弹支出">
           <i-switch v-model="modalForm.is_flexible_spending" size="large">
-            <span slot="open">固定</span>
-            <span slot="close">弹性</span>
+            <span slot="open">弹性</span>
+            <span slot="close">固定</span>
           </i-switch>
         </FormItem>
       </Form>
@@ -101,6 +102,11 @@ export default {
         body: ".ivu-modal",
         recover: true
       },
+      datePickerOptions: {
+        disabledDate(date) {
+          return date && date.valueOf() > Date.now();
+        }
+      },      
       modalForm: {
         charge_name: "",
         op_asset_id: 0,
@@ -220,7 +226,13 @@ export default {
     initSelectedTime() {
       var date = new Date();
       var firstDate = new Date(date.getFullYear(), date.getMonth(), 1);
-      this.selected_time = [firstDate, new Date()];
+      var today = new Date(
+        Date.parse(
+          new Date(date.getFullYear(), date.getMonth(), date.getDate())
+        ) +
+          86399000
+      );
+      this.selected_time = [firstDate, today];
     },
     changeSelectedTime(val) {
       this.formatTimeSearch();
@@ -256,6 +268,8 @@ export default {
     confirmModal() {
       var insertData = { ...this.modalForm };
       insertData.charge_time = Date.parse(insertData.charge_time);
+      delete insertData._index;
+      delete insertData._rowKey;
       upsertCharge(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");

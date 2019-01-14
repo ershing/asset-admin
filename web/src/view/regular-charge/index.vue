@@ -62,12 +62,18 @@
         </FormItem>
         <FormItem label="固弹支出">
           <i-switch v-model="modalForm.is_flexible_spending" size="large">
-            <span slot="open">固定</span>
-            <span slot="close">弹性</span>
+            <span slot="open">弹性</span>
+            <span slot="close">固定</span>
           </i-switch>
         </FormItem>
       </Form>
     </Modal>
+    <Modal
+      v-draggable="options"
+      v-model="confirmDeleteVisible"
+      title="警告"
+      @on-ok="confirmDelete"
+    >是否确认删除记账数据？</Modal>    
   </div>
 </template>
 
@@ -171,6 +177,11 @@ export default {
                   },
                   style: {
                     marginRight: "10px"
+                  },
+                  on: {
+                    click: () => {
+                      this.editModal(params);
+                    }
                   }
                 },
                 "编辑"
@@ -181,6 +192,11 @@ export default {
                   props: {
                     type: "error",
                     size: "small"
+                  },
+                  on: {
+                    click: () => {
+                      this.deleteCharge(params);
+                    }
                   }
                 },
                 "删除"
@@ -232,6 +248,8 @@ export default {
     },
     confirmModal() {
       var insertData = { ...this.modalForm };
+      delete insertData._index
+      delete insertData._rowKey
       insertData.begin_time = Date.parse(insertData.begin_time);
       upsertRegularCharge(insertData).then(res => {
         if (res.data.status) {
