@@ -14,7 +14,7 @@ var dict = sequelize.define('Dict', {
   },
   is_base: {
     type: Sequelize.BOOLEAN,
-    field: 'IsDelete',
+    field: 'IsBase',
     allowNull: false,
     defaultValue: 0
   },

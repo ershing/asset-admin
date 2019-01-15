@@ -11,7 +11,7 @@ module.exports = (req, res) => {
         create_time
     } = req.body
     for (let key in addData) {
-        if (addData[key] === undefined || addData[key] === null || addData[key] === '')
+        if (addData[key] === undefined || addData[key] === null || addData[key] === '' || addData[key] === 0)
             return res.send({
                 status: 0,
                 msg: '参数错误'

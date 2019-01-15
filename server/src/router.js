@@ -4,6 +4,9 @@ var router = express.Router();
 //验证账号信息
 router.post('/account/login',require('./controllers/account/login.js'));
 
+//获取所有基础字典
+router.get('/dict/all-base',require('./controllers/dict/allBase.js'));
+
 //获取资产列表
 router.get('/asset/list',require('./controllers/asset/getList.js'));
 
@@ -31,7 +34,7 @@ router.post('/regular-charge/upsert',require('./controllers/regular-charge/upser
 //删除定期记账
 router.post('/regular-charge/delete',require('./controllers/regular-charge/delete.js'));
 
-//获取所有基础字典
-router.get('/dict/all-base',require('./controllers/dict/allBase.js'));
+//创建字典分类
+router.post('/dict-class/upsert',require('./controllers/dict/createClassDict.js'));
 
 module.exports = router;

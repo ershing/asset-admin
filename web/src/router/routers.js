@@ -70,20 +70,20 @@ export default [
         component: () => import('@/view/asset-edit')
       },
       {
-        path: 'classify',
-        name: '资产分类',
+        path: 'module-classify',
+        name: '资产模块分类',
         meta: {
           icon: '_qq',
-          title: '资产分类'
+          title: '资产模块分类'
         },
         component: () => import('@/view/asset-classify')
       },
       {
-        path: 'edit',
-        name: '支出分类',
+        path: 'spending-classify',
+        name: '支出大项分类',
         meta: {
           icon: '_qq',
-          title: '支出分类'
+          title: '支出大项分类'
         },
         component: () => import('@/view/spending-classify')
       }            

@@ -11,27 +11,28 @@
       <div class="drag-box-card">
         <!-- 切记设置assetList和putList属性时，一定要添加.sync修饰符 -->
         <drag-list
-          :assetList.sync="assetList"
-          :putList.sync="putList"
+          :list1.sync="assetList"
+          :list2.sync="putList"
           :dropConClass="dropConClass"
           @on-change="handleChange"
         >
-          <h3 slot="left-title">资产列表</h3>
-          <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.name }}</Card>
+          <h3 slot="left-title">模块列表</h3>
+          <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.value }}</Card>
           <h3 slot="right-title">分类：
-            <Select v-model="belong_supporter" style="width: 200px">
+            <Select v-model="chosenClass" style="width: 200px">
               <Option value="beijing">New York</Option>
               <Option value="shanghai">London</Option>
               <Option value="shenzhen">Sydney</Option>
             </Select>
           </h3>
-          <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.name }}</Card>
+          <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.value }}</Card>
         </drag-list>
       </div>
     </Card>
   </div>
 </template>
 <script>
+import { createDictClass } from "@/api/base";
 import DragList from "_c/drag-list";
 export default {
   name: "AssetClassify",
@@ -47,6 +48,8 @@ export default {
       classList: [],
       assetList: [],
       putList: [],
+      //选中类
+      chosenClass: '',
       dropConClass: {
         left: ["drop-box", "left-drop-box"],
         right: ["drop-box", "right-drop-box"]
@@ -56,13 +59,20 @@ export default {
   },
   methods: {
     handleChange({ src, target, oldIndex, newIndex }) {},
-    createClass() {}
+    createClass(val) {
+      // createDictClass
+    },
+    getAllClass(){
+
+    }
   },
   mounted() {
-    getDragList().then(res => {
-      this.assetList = res.data;
-      this.putList = [res.data[0]];
-    });
+    this.assetList = this.$root.$dict.moduleDict.filter(ele => ele).map(ele => ({
+      id: ele.code,
+      ...ele
+    }));
+    console.log(this.assetList)
+    // this.putList = [res.data[0]];
   }
 };
 </script>
@@ -74,6 +84,9 @@ export default {
   height: 560px;
   .drag-item {
     margin: 10px;
+    padding: 0px;
+    height: 35px;
+    line-height: 5px;
   }
   h3 {
     height: 52px;
@@ -84,13 +97,13 @@ export default {
     border: 1px solid #eeeeee;
     height: 455px;
     border-radius: 5px;
+    overflow: auto;
   }
   .left-drop-box {
-    margin-right: 10px;
+    margin-right: 20px;
   }
   .right-drop-box {
     //
-
   }
 }
 </style>

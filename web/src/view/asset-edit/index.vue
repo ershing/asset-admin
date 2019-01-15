@@ -18,27 +18,44 @@
         </FormItem>
         <FormItem label="所属载体">
           <Select v-model="modalForm.belong_supporter" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+            <Option
+              v-for="ele of $root.$dict.supporterDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="信用卡类">
-          <i-switch v-model="modalForm.is_credit_class" size="large">
+          <i-switch
+            v-model="modalForm.is_credit_class"
+            size="large"
+            @on-change="modalForm.belong_module=0"
+          >
             <span slot="open">是</span>
             <span slot="close">否</span>
           </i-switch>
         </FormItem>
-        <FormItem label="具体模块">
+        <FormItem label="具体模块" v-if="modalForm.is_credit_class">
           <Select v-model="modalForm.belong_module" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+            <Option
+              v-for="ele of $root.$dict.creditModuleDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
+          </Select>
+        </FormItem>
+        <FormItem label="具体模块" v-if="!modalForm.is_credit_class">
+          <Select v-model="modalForm.belong_module" style="width: 200px">
+            <Option
+              v-for="ele of $root.$dict.moduleDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="资金总和">
           <Input
-            v-model="modalForm.profit"
+            v-model.number="modalForm.profit"
             prefix="logo-usd"
             placeholder="Enter number"
             style="width: 200px"
@@ -54,9 +71,12 @@
         </FormItem>
       </Form>
     </Modal>
-    <Modal v-draggable="options" v-model="confirmDeleteVisible" title="警告" @on-ok="confirmDelete">
-      是否确认删除资产数据？
-    </Modal>
+    <Modal
+      v-draggable="options"
+      v-model="confirmDeleteVisible"
+      title="警告"
+      @on-ok="confirmDelete"
+    >是否确认删除资产数据？</Modal>
   </div>
 </template>
 
@@ -80,7 +100,7 @@ export default {
         belong_supporter: 0,
         is_credit_class: false,
         belong_module: 0,
-        profit: 0.0,
+        profit: 0.01,
         create_time: new Date()
       },
       columns: [
@@ -98,7 +118,13 @@ export default {
         {
           title: "所属载体",
           align: "center",
-          key: "belong_supporter"
+          key: "belong_supporter",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.supporterDict[params.row.belong_supporter].value
+            );
+          }
         },
         {
           title: "信用卡类",
@@ -111,7 +137,13 @@ export default {
         {
           title: "具体模块",
           align: "center",
-          key: "belong_module"
+          key: "belong_module",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.moduleDict[params.row.belong_module].value
+            );
+          }
         },
         {
           title: "资金余额",
@@ -188,7 +220,7 @@ export default {
         belong_supporter: 0,
         is_credit_class: false,
         belong_module: 0,
-        profit: 0.0,
+        profit: 0.01,
         create_time: new Date()
       };
     },
@@ -204,13 +236,13 @@ export default {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");
           this.getAssetList();
-        }else{
-          this.$Message.success(this.modalTitle + "失败！");
+        } else {
+          this.$Message.error(this.modalTitle + "失败！");
         }
       });
     },
     confirmDelete() {
-      var params = this.deleteParams
+      var params = this.deleteParams;
       deleteAsset({ asset_id: params.row.asset_id }).then(res => {
         if (res.data.status) {
           this.$Message.success(params.row.asset_name + "删除成功！");
@@ -219,8 +251,8 @@ export default {
       });
     },
     deleteAsset(params) {
-      this.confirmDeleteVisible = true
-      this.deleteParams = params
+      this.confirmDeleteVisible = true;
+      this.deleteParams = params;
     }
   }
 };

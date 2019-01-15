@@ -55,6 +55,7 @@ export default {
     getDragList().then(res => {
       this.list1 = res.data
       this.list2 = [res.data[0]]
+      console.log(res.data)
     })
   }
 }

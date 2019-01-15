@@ -1,5 +1,13 @@
 import axios from '@/libs/api.request'
 
+//字典
+export const getAllBaseDict = () => {
+    return axios.request({
+        method: 'get',
+        url: '/dict/all-base'
+    })
+}
+
 //资产
 export const getAsset = (params) => {
     return axios.request({
@@ -71,6 +79,15 @@ export const deleteRegularCharge = (data) => {
     return axios.request({
         method: 'post',
         url: 'regular-charge/delete',
+        data,
+    })
+}
+
+//创建分类
+export const createDictClass = (data) => {
+    return axios.request({
+        method: 'post',
+        url: 'dict-class/upsert',
         data,
     })
 }
