@@ -73,12 +73,16 @@
       v-model="confirmDeleteVisible"
       title="警告"
       @on-ok="confirmDelete"
-    >是否确认删除记账数据？</Modal>    
+    >是否确认删除记账数据？</Modal>
   </div>
 </template>
 
 <script>
-import { getRegularCharge, upsertRegularCharge, deleteRegularCharge } from "@/api/base";
+import {
+  getRegularCharge,
+  upsertRegularCharge,
+  deleteRegularCharge
+} from "@/api/base";
 export default {
   name: "RugularCharge",
   data() {
@@ -140,7 +144,7 @@ export default {
         {
           title: "记账周期",
           align: "center",
-          key: "period_type",
+          key: "period_type"
           // render: (h, params) => {
           //   return h("span", "￥" + params.row.period_type);
           // }
@@ -150,7 +154,12 @@ export default {
           align: "center",
           key: "begin_time",
           render: (h, params) => {
-            var times = params.row.begin_time.split(" ");
+            var times = "";
+            if (params.row.begin_time) {
+              times = params.row.begin_time.split(" ");
+            } else {
+              times = [];
+            }
             return h("span", times[0]);
           }
         },
@@ -248,8 +257,8 @@ export default {
     },
     confirmModal() {
       var insertData = { ...this.modalForm };
-      delete insertData._index
-      delete insertData._rowKey
+      delete insertData._index;
+      delete insertData._rowKey;
       insertData.begin_time = Date.parse(insertData.begin_time);
       upsertRegularCharge(insertData).then(res => {
         if (res.data.status) {

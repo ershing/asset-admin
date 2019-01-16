@@ -12,12 +12,22 @@
       <DatePicker
         v-model="selected_time"
         type="daterange"
+        :clearable="false"
         placement="bottom-end"
         placeholder="选择时间范围"
         style="float: right;width: 200px"
         :options="datePickerOptions"
         @on-change="changeSelectedTime"
       ></DatePicker>
+      <Page
+        style="float:right;"
+        :total="total"
+        :page-size="limit"
+        show-sizer
+        @on-change="changePage"
+        @on-page-size-change="changePageSize"
+        :page-size-opts="[5, 10, 15, 30]"
+      />
     </header>
     <Table :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
@@ -97,7 +107,15 @@ export default {
       },
       datePickerOptions: {
         disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86399000;
+          var dateNow = new Date();
+          return (
+            date &&
+            date.valueOf() <
+              Date.parse(
+                new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate())
+              ) +
+                86400000
+          );
         }
       },
       modalForm: {
@@ -109,6 +127,8 @@ export default {
         charge_time: new Date(),
         is_flexible_spending: false
       },
+      total: 0,
+      limit: 5,
       columns: [
         {
           type: "index",
@@ -214,9 +234,9 @@ export default {
     initSelectedTime() {
       var date = new Date();
       var firstDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
+        Date.parse(
+          new Date(date.getFullYear(), date.getMonth(), date.getDate())
+        ) + 86400000
       );
       var today = new Date(
         Date.parse(
@@ -234,10 +254,33 @@ export default {
     changeSelectedTime(val) {
       this.formatTimeSearch();
     },
-    formatTimeSearch() {
+    changePage(page) {
+      this.formatTimeSearch(page);
+    },
+    changePageSize(limit) {
+      this.limit = limit;
+      this.formatTimeSearch(1);
+    },
+    formatTimeSearch(page) {
+      page = page || 1;
       var start_charge_time = Date.parse(this.selected_time[0]);
-      var end_charge_time = Date.parse(this.selected_time[1]);
-      this.getChargeList({ start_charge_time, end_charge_time });
+      var date = new Date(this.selected_time[1]);
+      var end_charge_time =
+        Date.parse(
+          new Date(
+            date.getMonth() === 11
+              ? date.getFullYear() + 1
+              : date.getFullYear(),
+            date.getMonth() === 11 ? 1 : date.getMonth() + 1,
+            1
+          )
+        ) - 1000;
+      this.getChargeList({
+        start_charge_time,
+        end_charge_time,
+        page,
+        limit: this.limit
+      });
     },
     getChargeList(params) {
       getCharge(params).then(res => {

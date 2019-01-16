@@ -12,15 +12,24 @@
       <DatePicker
         v-model="selected_time"
         type="daterange"
+        :clearable="false"
         placement="bottom-end"
         placeholder="选择时间范围"
         style="float: right;width: 200px"
         :options="datePickerOptions"
         @on-change="changeSelectedTime"
       ></DatePicker>
+      <Page
+        style="float:right;"
+        :total="total"
+        :page-size="limit"
+        show-sizer
+        @on-change="changePage"
+        @on-page-size-change="changePageSize"
+        :page-size-opts="[5, 10, 15, 30]"
+      />
     </header>
     <Table :columns="columns" :data="data"></Table>
-    <Page :total="total" :page-size="limit" show-sizer :on-change="changePage" :on-page-size-change="changePageSize"/>
     <Modal
       v-draggable="options"
       v-model="modalVisible"
@@ -107,7 +116,7 @@ export default {
         disabledDate(date) {
           return date && date.valueOf() > Date.now();
         }
-      },      
+      },
       modalForm: {
         charge_name: "",
         op_asset_id: 0,
@@ -118,7 +127,7 @@ export default {
         is_flexible_spending: false
       },
       total: 0,
-      limit: 20,
+      limit: 5,
       columns: [
         {
           type: "index",
@@ -232,31 +241,40 @@ export default {
       var today = new Date(
         Date.parse(
           new Date(date.getFullYear(), date.getMonth(), date.getDate())
-        ) +
-          86399000
+        ) + 86399000
       );
       this.selected_time = [firstDate, today];
     },
     changeSelectedTime(val) {
       this.formatTimeSearch();
     },
-    changePage(page){
-      this.formatTimeSearch(page)
+    changePage(page) {
+      this.formatTimeSearch(page);
     },
-    changePageSize(limit){
-      this.limit = limit
-      this.formatTimeSearch(1)
+    changePageSize(limit) {
+      this.limit = limit;
+      this.formatTimeSearch(1);
     },
     formatTimeSearch(page) {
-      page = page || 1
+      page = page || 1;
       var start_charge_time = Date.parse(this.selected_time[0]);
-      var end_charge_time = Date.parse(this.selected_time[1]);
-      this.getChargeList({ start_charge_time, end_charge_time, page, limit: this.limit });
+      var date = new Date(this.selected_time[1]);
+      var end_charge_time =
+        Date.parse(
+          new Date(date.getFullYear(), date.getMonth(), date.getDate())
+        ) + 86399000;
+      this.getChargeList({
+        start_charge_time,
+        end_charge_time,
+        page,
+        limit: this.limit
+      });
     },
     getChargeList(params) {
       getCharge(params).then(res => {
         if (res.data.status) {
           this.data = res.data.data || [];
+          this.total = res.data.total || 0;
         }
       });
     },

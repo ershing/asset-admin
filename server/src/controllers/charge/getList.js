@@ -15,8 +15,7 @@ module.exports = (req, res) => {
                 msg: '参数错误'
             })
     }
-    charge.fin
-    charge.findAllAndCount({
+    charge.findAndCount({
         offset: (page - 1) * limit,
         limit,
         where: { is_delete: 0, is_plan: 0, charge_time: { $gte: moment(Number(start_charge_time)).format(), $lte: moment(Number(end_charge_time)).format() } }, attributes: [
@@ -29,7 +28,7 @@ module.exports = (req, res) => {
             'charge_time',
             'is_flexible_spending'
         ], order: [['charge_time', 'DESC']],
-        distinct: true,
+        // distinct: true,
     }).then(result => {
         res.send({
             status: 1,

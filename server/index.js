@@ -1,6 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-const JwtUtil = require('../../utils/jwt');
+const JwtUtil = require('./src/utils/jwt.js');
 app = express();
 
 app.use(function (req, res, next) {
