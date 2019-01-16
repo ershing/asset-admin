@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+const JwtUtil = require('../../utils/jwt');
 app = express();
 
 app.use(function (req, res, next) {
@@ -7,7 +8,18 @@ app.use(function (req, res, next) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': ['Content-Type']
     })
-    next();
+    // if (req.url != '/account/login' && req.url != '/account/register') {
+    //     let token = req.headers.token;
+    //     let jwt = new JwtUtil(token);
+    //     let result = jwt.verifyToken();
+    //     if (result == 'err') {
+    //         res.send({status: 403, msg: '登录已过期,请重新登录'});
+    //     } else {
+    //         next();
+    //     }
+    // } else {
+        next();
+    // }
 })
 
 app.use(bodyParser.json()); // for parsing application/json

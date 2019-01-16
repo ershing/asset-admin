@@ -1,11 +1,9 @@
-const charge = require('../../models/charge');
+const dict = require('../../models/dict');
 
 module.exports = (req, res) => {
     var addData = {
       id,
-      dict_name,
-      code,
-      value
+      classify_id
     } = req.body
     for (let key in addData) {
         if (addData[key] === undefined || addData[key] === null || addData[key] === '' || addData[key] === 0)
@@ -14,10 +12,8 @@ module.exports = (req, res) => {
                 msg: '参数错误'
             })
     }
-    addData.create_time = Date.parse(new Date());
-    addData.id = req.body.id || uuid();
-    addData.account_id =  req.body.charge_id || uuid();
-    charge.update(addData).then(data => {
+    addData.account_id =  req.body.dict_id || uuid();
+    dict.update(addData).then(data => {
         res.send({
             status: 1
         })

@@ -37,4 +37,12 @@ router.post('/regular-charge/delete',require('./controllers/regular-charge/delet
 //创建字典分类
 router.post('/dict-class/upsert',require('./controllers/dict/createClassDict.js'));
 
+//删除某个字典分类
+router.get('/dict-class/delete', require('./controllers/dict/deleteClassDict.js'))
+
+//获取某个分类字典
+router.get('/dict-class/list', require('./controllers/dict/allClass.js'))
+
+
+
 module.exports = router;

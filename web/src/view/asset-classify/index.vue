@@ -5,7 +5,14 @@
       <Button type="success" @click="createClass">新增</Button>
     </header>
     <section style="marginBottom:10px;">
-      <Tag color="cyan" closable>success</Tag>
+      <Tag
+        v-for="ele of moduleClassDictl.filter(ele => ele)"
+        :key="ele.code"
+        :name="ele.dict_id"
+        color="cyan"
+        closable
+        @on-close="delClass"
+      >{{ele.value}}</Tag>
     </section>
     <Card>
       <div class="drag-box-card">
@@ -16,13 +23,15 @@
           :dropConClass="dropConClass"
           @on-change="handleChange"
         >
-          <h3 slot="left-title">模块列表</h3>
+          <h3 slot="left-title">未分类模块列表</h3>
           <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.value }}</Card>
           <h3 slot="right-title">分类：
-            <Select v-model="chosenClass" style="width: 200px">
-              <Option value="beijing">New York</Option>
-              <Option value="shanghai">London</Option>
-              <Option value="shenzhen">Sydney</Option>
+            <Select v-model="chosenClassCode" style="width: 200px" @on-change="changeSelectClass">
+              <Option
+                v-for="ele of moduleClassDictl.filter(ele => ele)"
+                :key="ele.code"
+                :value="ele.dict_id"
+              >{{ele.value}}</Option>
             </Select>
           </h3>
           <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.value }}</Card>
@@ -32,7 +41,7 @@
   </div>
 </template>
 <script>
-import { createDictClass } from "@/api/base";
+import { createDictClass, getDictClass, delDictClass } from "@/api/base";
 import DragList from "_c/drag-list";
 export default {
   name: "AssetClassify",
@@ -41,15 +50,15 @@ export default {
   },
   data() {
     return {
-      dict_name: "ASSET_CLASSIFY",
-      code: 1,
+      moduleClassDict: [],
+      dict_name: "MODULE_CLASSIFY",
       value: "",
       //标签集合
       classList: [],
       assetList: [],
       putList: [],
       //选中类
-      chosenClass: '',
+      chosenClassCode: "",
       dropConClass: {
         left: ["drop-box", "left-drop-box"],
         right: ["drop-box", "right-drop-box"]
@@ -58,21 +67,62 @@ export default {
     };
   },
   methods: {
-    handleChange({ src, target, oldIndex, newIndex }) {},
-    createClass(val) {
-      // createDictClass
+    handleChange({ src, target, oldIndex, newIndex }) {
+      console.log({ src, target, oldIndex, newIndex });
     },
-    getAllClass(){
-
+    changeSelectClass(dict_id) {
+      this.putList = this.$root.$dict.moduleDict
+        .filter(ele => ele.classify_id === dict_id)
+        .map(ele => ({
+          id: ele.code,
+          ...ele
+        }));
+    },
+    delClass(dict_id) {
+      delDictClass({ dict_id }).then(res => {
+        if (res.data.status) {
+          this.$Message.success("删除分类成功");
+        } else {
+          this.$Message.error("删除分类失败");
+        }
+      });
+    },
+    createClass(val) {
+      createDictClass({
+        dict_name: this.dict_name,
+        code: this.moduleClassDict[this.moduleClassDict.length - 1].code + 1,
+        value: this.value
+      }).then(res => {
+        if (res.data.status) {
+          this.$Message.success("新增分类成功");
+          this.getAllClass();
+        } else {
+          this.$Message.error("新增分类失败");
+        }
+      });
+    },
+    getAllClass(callback) {
+      getDictClass({ dict_name: this.dict_name }).then(res => {
+        if (res.data.status) {
+          this.moduleClassDict = res.data.data;
+          callback && callback();
+        }
+      });
+    },
+    getAssetDict() {
+      this.assetList = this.$root.$dict.moduleDict
+        .filter(ele => !ele.classify_id)
+        .map(ele => ({
+          id: ele.code,
+          ...ele
+        }));
     }
   },
   mounted() {
-    this.assetList = this.$root.$dict.moduleDict.filter(ele => ele).map(ele => ({
-      id: ele.code,
-      ...ele
-    }));
-    console.log(this.assetList)
-    // this.putList = [res.data[0]];
+    this.getAssetDict();
+    this.getAllClass(() => {
+      this.chosenClassCode = this.moduleClassDict[0].dict_id
+    });
   }
 };
 </script>
@@ -104,6 +154,7 @@ export default {
   }
   .right-drop-box {
     //
+
   }
 }
 </style>

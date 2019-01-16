@@ -1,5 +1,6 @@
 const account = require('../../models/account');
 const password = require('password-slow-hash');
+const JwtUtil = require('../../utils/jwt');
 
 module.exports = (req, res) => {
   let { login_name, pwd } = req.body
@@ -22,8 +23,12 @@ module.exports = (req, res) => {
         }
         // 密码正确
         else if (isValid) {
+          let _id = result.account_id.toString()
+          let jwt = new JwtUtil(_id)
+          let token = jwt.generateToken()
           return res.send({
             status: 1,
+            data: token,
             msg: '验证成功'
           })
         }

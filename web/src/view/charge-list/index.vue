@@ -20,6 +20,7 @@
       ></DatePicker>
     </header>
     <Table :columns="columns" :data="data"></Table>
+    <Page :total="total" :page-size="limit" show-sizer :on-change="changePage" :on-page-size-change="changePageSize"/>
     <Modal
       v-draggable="options"
       v-model="modalVisible"
@@ -116,6 +117,8 @@ export default {
         charge_time: new Date(),
         is_flexible_spending: false
       },
+      total: 0,
+      limit: 20,
       columns: [
         {
           type: "index",
@@ -237,10 +240,18 @@ export default {
     changeSelectedTime(val) {
       this.formatTimeSearch();
     },
-    formatTimeSearch() {
+    changePage(page){
+      this.formatTimeSearch(page)
+    },
+    changePageSize(limit){
+      this.limit = limit
+      this.formatTimeSearch(1)
+    },
+    formatTimeSearch(page) {
+      page = page || 1
       var start_charge_time = Date.parse(this.selected_time[0]);
       var end_charge_time = Date.parse(this.selected_time[1]);
-      this.getChargeList({ start_charge_time, end_charge_time });
+      this.getChargeList({ start_charge_time, end_charge_time, page, limit: this.limit });
     },
     getChargeList(params) {
       getCharge(params).then(res => {

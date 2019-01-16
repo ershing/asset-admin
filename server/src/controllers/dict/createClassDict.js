@@ -1,4 +1,4 @@
-const charge = require('../../models/charge');
+const dict = require('../../models/dict');
 const uuid = require('uuid/v4');
 
 module.exports = (req, res) => {
@@ -16,8 +16,8 @@ module.exports = (req, res) => {
     }
     addData.create_time = Date.parse(new Date());
     addData.id = req.body.id || uuid();
-    addData.account_id =  req.body.charge_id || uuid();
-    charge.upsert(addData).then(data => {
+    addData.account_id =  req.body.dict_id || uuid();
+    dict.upsert(addData).then(data => {
         res.send({
             status: 1
         })

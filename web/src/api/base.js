@@ -83,11 +83,27 @@ export const deleteRegularCharge = (data) => {
     })
 }
 
-//创建分类
+//分类
 export const createDictClass = (data) => {
     return axios.request({
         method: 'post',
         url: 'dict-class/upsert',
+        data,
+    })
+}
+
+export const getDictClass = (data) => {
+    return axios.request({
+        method: 'post',
+        url: 'dict-class/list',
+        data,
+    })
+}
+
+export const delDictClass = (data) => {
+    return axios.request({
+        method: 'post',
+        url: 'dict-class/delete',
         data,
     })
 }
