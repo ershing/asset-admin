@@ -15,10 +15,18 @@ module.exports = (req, res) => {
                 msg: '参数错误'
             })
     }
+    var year = (new Date()).getFullYear()
+    if(req.query.year){
+        year = req.query.year
+    }
+    var yearStart = Date.parse(new Date(year, 0, 1));
+    var yearEnd = Date.parse(new Date(Number(year) + 1, 0, 1)) - 1000;
+    var searchStartTime = Number(start_charge_time) > yearStart ? Number(start_charge_time) : yearStart
+    var searchEndTime = Number(end_charge_time) < yearEnd ? Number(end_charge_time) : yearEnd
     charge.findAndCount({
         offset: (page - 1) * limit,
         limit,
-        where: { is_delete: 0, is_plan: 0, charge_time: { $gte: moment(Number(start_charge_time)).format(), $lte: moment(Number(end_charge_time)).format() } }, attributes: [
+        where: { is_delete: 0, is_plan: 0, charge_time: { $gte: moment(searchStartTime).format(), $lte: moment(searchEndTime).format() } }, attributes: [
             'charge_id',
             'charge_name',
             'op_asset_id',

@@ -77,16 +77,15 @@ const chargeTypeDict = [
   { code: 3, value: '内部转账出'}
 ]
 
+//不能改，依赖
 const periodTypeDict = [
   { code: 1, value: '日' },
   { code: 2, value: '周' },
   { code: 3, value: '月' },
   { code: 4, value: '季' },
   { code: 5, value: '年' },
-  { code: 5, value: '周一到周五' },
-  { code: 5, value: '周六周日' },
-  { code: 5, value: '工作日' },
-  { code: 5, value: '节假日' },
+  { code: 6, value: '周一到周五' },
+  { code: 7, value: '周六周日' }
 ]
 
 module.exports = {

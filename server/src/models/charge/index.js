@@ -69,6 +69,11 @@ var charge = sequelize.define('Charge', {
     allowNull: false,
     defaultValue: 0
   },
+  plan_charge_id: {
+    type: Sequelize.STRING(36),
+    field: 'PlanChargeId',
+    allowNull: true
+  },
   period_type: {
     type: Sequelize.INTEGER,
     field: 'PeriodType',

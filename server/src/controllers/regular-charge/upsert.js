@@ -24,6 +24,7 @@ module.exports = (req, res) => {
     addData.charge_id = req.body.charge_id || uuid();
     addData.account_id =  req.body.charge_id || uuid();
     charge.upsert(addData).then(data => {
+        
         res.send({
             status: 1
         })
