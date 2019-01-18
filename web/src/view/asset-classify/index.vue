@@ -6,10 +6,11 @@
     </header>
     <section style="marginBottom:10px;">
       <Tag
-        v-for="ele of moduleClassDictl.filter(ele => ele)"
-        :key="ele.code"
-        :name="ele.dict_id"
-        color="cyan"
+        v-for="ele of moduleClassDict.filter(ele => ele)"
+        :key="ele.id"
+        :name="ele.id"
+        type="border"
+        color="success"
         closable
         @on-close="delClass"
       >{{ele.value}}</Tag>
@@ -28,9 +29,9 @@
           <h3 slot="right-title">分类：
             <Select v-model="chosenClassCode" style="width: 200px" @on-change="changeSelectClass">
               <Option
-                v-for="ele of moduleClassDictl.filter(ele => ele)"
+                v-for="ele of moduleClassDict.filter(ele => ele)"
                 :key="ele.code"
-                :value="ele.dict_id"
+                :value="ele.id"
               >{{ele.value}}</Option>
             </Select>
           </h3>
@@ -41,7 +42,12 @@
   </div>
 </template>
 <script>
-import { createDictClass, getDictClass, delDictClass } from "@/api/base";
+import {
+  getAllBaseDict,
+  createDictClass,
+  getDictClass,
+  delDictClass
+} from "@/api/base";
 import DragList from "_c/drag-list";
 export default {
   name: "AssetClassify",
@@ -67,21 +73,48 @@ export default {
     };
   },
   methods: {
+    refreshDict(dict_id) {
+      getAllBaseDict().then(res => {
+        var dicts = {};
+        res.data &&
+          res.data.data.forEach(ele => {
+            if (!dicts[ele.dict_name]) {
+              dicts[ele.dict_name] = [];
+            }
+            dicts[ele.dict_name][ele.code] = ele;
+          });
+        localStorage.setItem("dicts", JSON.stringify(dicts));
+        this.$root.$dict = dicts;
+        this.getAssetDict();
+        this.getAllClass(() => {
+          if (this.chosenClassCode === dict_id) {
+            this.chosenClassCode = this.moduleClassDict.length
+              ? this.moduleClassDict[this.moduleClassDict.length - 1].id
+              : "";
+          }
+        });
+      });
+    },
     handleChange({ src, target, oldIndex, newIndex }) {
-      console.log({ src, target, oldIndex, newIndex });
+      if (src === "left" && target === "right") {
+        // 分类
+        var id = this.putList[newIndex];
+      }
+
+      if (src === "right" && target === "left") {
+        //取消分类
+      }
     },
     changeSelectClass(dict_id) {
-      this.putList = this.$root.$dict.moduleDict
-        .filter(ele => ele.classify_id === dict_id)
-        .map(ele => ({
-          id: ele.code,
-          ...ele
-        }));
+      this.putList = this.$root.$dict.moduleDict.filter(
+        ele => ele.classify_id === dict_id
+      );
     },
-    delClass(dict_id) {
+    delClass(e, dict_id) {
       delDictClass({ dict_id }).then(res => {
         if (res.data.status) {
           this.$Message.success("删除分类成功");
+          this.refreshDict(dict_id);
         } else {
           this.$Message.error("删除分类失败");
         }
@@ -90,12 +123,19 @@ export default {
     createClass(val) {
       createDictClass({
         dict_name: this.dict_name,
-        code: this.moduleClassDict[this.moduleClassDict.length - 1].code + 1,
+        code: this.moduleClassDict.length
+          ? this.moduleClassDict[this.moduleClassDict.length - 1].code + 1
+          : 1,
         value: this.value
       }).then(res => {
         if (res.data.status) {
+          this.value = "";
           this.$Message.success("新增分类成功");
-          this.getAllClass();
+          this.getAllClass(() => {
+            this.chosenClassCode = this.moduleClassDict.length
+              ? this.moduleClassDict[this.moduleClassDict.length - 1].id
+              : "";
+          });
         } else {
           this.$Message.error("新增分类失败");
         }
@@ -110,18 +150,17 @@ export default {
       });
     },
     getAssetDict() {
-      this.assetList = this.$root.$dict.moduleDict
-        .filter(ele => !ele.classify_id)
-        .map(ele => ({
-          id: ele.code,
-          ...ele
-        }));
+      this.assetList = this.$root.$dict.moduleDict.filter(
+        ele => ele && !ele.classify_id
+      );
     }
   },
   mounted() {
     this.getAssetDict();
     this.getAllClass(() => {
-      this.chosenClassCode = this.moduleClassDict[0].dict_id
+      this.chosenClassCode = this.moduleClassDict.length
+        ? this.moduleClassDict[0].id
+        : "";
     });
   }
 };
