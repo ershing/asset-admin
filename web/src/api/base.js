@@ -92,11 +92,11 @@ export const createDictClass = (data) => {
     })
 }
 
-export const getDictClass = (data) => {
+export const getDictClass = (params) => {
     return axios.request({
-        method: 'post',
+        method: 'get',
         url: 'dict-class/list',
-        data,
+        params,
     })
 }
 
