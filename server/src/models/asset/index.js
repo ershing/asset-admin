@@ -13,8 +13,7 @@ var asset = sequelize.define('Asset', {
   account_id:{
     type: Sequelize.STRING(36),
     field: 'AccountId',
-    unique: true, 
-    allowNull: false,
+    allowNull: false
   },
   asset_name: {
     type: Sequelize.STRING(30),
