@@ -46,7 +46,8 @@ import {
   getAllBaseDict,
   createDictClass,
   getDictClass,
-  delDictClass
+  delDictClass,
+  classifyBaseDict
 } from "@/api/base";
 import DragList from "_c/drag-list";
 export default {
@@ -99,10 +100,27 @@ export default {
       if (src === "left" && target === "right") {
         // 分类
         var id = this.putList[newIndex];
+        classifyBaseDict({ id, classify_id: this.chosenClassCode })
+          .then(res => {
+            this.$Message.success("分类成功");
+          })
+          .catch(e => {
+            this.$Message.error("分类失败");
+          });
+        this.refreshDict();
       }
 
       if (src === "right" && target === "left") {
         //取消分类
+        var id = this.assetList[newIndex];
+        classifyBaseDict({ id, classify_id: "" })
+          .then(res => {
+            this.$Message.success("取消分类成功");
+          })
+          .catch(e => {
+            this.$Message.error("取消分类失败");
+          });
+        this.refreshDict();
       }
     },
     changeSelectClass(dict_id) {

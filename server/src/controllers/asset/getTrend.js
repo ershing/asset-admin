@@ -1,9 +1,10 @@
 const asset = require('../../models/asset');
+const charge = require('../../models/charge');
 const moment = require('moment');
 var async = require('async');
 
 module.exports = (req, res) => {
-  if(!req.query.asset_id){
+  if (!req.query.asset_id) {
     return res.send({
       status: 0,
       msg: '参数错误'
@@ -28,6 +29,12 @@ module.exports = (req, res) => {
         msg: '数据库错误'
       });
     }
+    if (!result) {
+      return res.send({
+        status: 0,
+        data: []
+      });
+    }
     formatTrend(result)
   });
 
@@ -47,11 +54,30 @@ module.exports = (req, res) => {
   }
 
   function getChargeList() {
-
+    charge.findAll({
+      where: { is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }] },
+      order: [['charge_time', 'ASC']],
+    }).then(data => {
+      callback(null, data)
+    }).catch(e => {
+      callback(e)
+    })
   }
 
-  function formatTrend() {
+  function formatTrend(results) {
+    var target = results[0]
+    var charList = results[1]
+    var assetHistoryList = []
+    assetHistoryList.push({ time: target.create_time, profit: target.profit })
+    charList.forEach(ele => {
+      if (new Date(ele.create_time)){
 
+      }
+    })
+    return res.send({
+      status: 1,
+      data: results
+    });
   }
 
 

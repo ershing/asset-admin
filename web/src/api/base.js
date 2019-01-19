@@ -107,3 +107,11 @@ export const delDictClass = (data) => {
         data,
     })
 }
+
+export const classifyBaseDict = (data) => {
+    return axios.request({
+        method: 'post',
+        url: 'dict-base/classify',
+        data,
+    })
+}

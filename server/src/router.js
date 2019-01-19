@@ -43,6 +43,9 @@ router.post('/dict-class/delete', require('./controllers/dict/deleteClassDict.js
 //获取某个分类字典
 router.get('/dict-class/list', require('./controllers/dict/allClass.js'))
 
+//分类某个基础字典
+router.post('/dict-base/classify', require('./controllers/dict/classificationBase.js'))
+
 
 
 module.exports = router;
