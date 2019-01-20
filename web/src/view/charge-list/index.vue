@@ -29,7 +29,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table :columns="columns" :data="data"></Table>
+    <Table v-if="assetList.length" :columns="columns" :data="data"></Table>
     <Modal
       v-draggable="options"
       v-model="modalVisible"
@@ -43,23 +43,59 @@
         </FormItem>
         <FormItem label="操作资产">
           <Select v-model="modalForm.op_asset_id" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+            <Option
+              v-for="ele of assetList"
+              :key="ele.asset_id"
+              :value="ele.asset_id"
+            >{{ele.asset_name}}</Option>
           </Select>
         </FormItem>
         <FormItem label="操作方式">
-          <Select v-model="modalForm.charge_type" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+          <Select
+            v-model="modalForm.charge_type"
+            style="width: 200px"
+            @on-change="modalForm.target_id = 0;"
+          >
+            <Option
+              v-for="ele of $root.$dict.chargeTypeDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="操作目标">
-          <Select v-model="modalForm.target_id" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+          <Select
+            v-if="!modalForm.charge_type || modalForm.charge_type<=1"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of $root.$dict.earnTargetDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
+          </Select>
+          <Select
+            v-if="modalForm.charge_type===2"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of $root.$dict.spendingTargetDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
+          </Select>
+          <Select
+            v-if="modalForm.charge_type===3"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of assetList"
+              :key="ele.asset_id"
+              :value="ele.asset_id"
+            >{{ele.asset_name}}</Option>
           </Select>
         </FormItem>
         <FormItem label="资金总量">
@@ -96,11 +132,13 @@
 </template>
 
 <script>
-import { getCharge, upsertCharge, deleteCharge } from "@/api/base";
+import { getAsset, getCharge, upsertCharge, deleteCharge } from "@/api/base";
 export default {
-  name: "ChargeEdit",
+  name: "ChargeList",
   data() {
     return {
+      //资产列表
+      assetList: [],
       // 选择的时间范围
       selected_time: [],
       modalVisible: false,
@@ -122,7 +160,7 @@ export default {
         op_asset_id: 0,
         charge_type: 0,
         target_id: 0,
-        count: 0,
+        count: 0.01,
         charge_time: new Date(),
         is_flexible_spending: false
       },
@@ -143,17 +181,55 @@ export default {
         {
           title: "操作资产",
           align: "center",
-          key: "op_asset_id"
+          key: "op_asset_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.assetList.filter(
+                ele => ele.asset_id === params.row.op_asset_id
+              )[0].asset_name
+            );
+          }
         },
         {
           title: "操作方式",
           align: "center",
-          key: "charge_type"
+          key: "charge_type",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.chargeTypeDict.filter(
+                ele => ele && ele.code === params.row.charge_type
+              )[0].value
+            );
+          }
         },
         {
           title: "操作目标",
           align: "center",
-          key: "target_id"
+          key: "target_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              (params.row.target_id &&
+                params.row.charge_type &&
+                {
+                  1: () =>
+                    this.$root.$dict.earnTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  2: () =>
+                    this.$root.$dict.spendingTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  3: () =>
+                    this.assetList.filter(
+                      ele => ele.asset_id === params.row.target_id
+                    )[0].asset_name
+                }[params.row.charge_type]()) ||
+                ""
+            );
+          }
         },
         {
           title: "资金总量",
@@ -226,6 +302,7 @@ export default {
     };
   },
   mounted() {
+    this.getAssetList();
     this.initSelectedTime();
     this.formatTimeSearch();
   },
@@ -235,6 +312,13 @@ export default {
     }
   },
   methods: {
+    getAssetList() {
+      getAsset().then(res => {
+        if (res.data.status) {
+          this.assetList = res.data.data || [];
+        }
+      });
+    },
     initSelectedTime() {
       var date = new Date();
       var firstDate = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -284,7 +368,7 @@ export default {
         op_asset_id: 0,
         charge_type: 0,
         target_id: 0,
-        count: 0,
+        count: 0.01,
         charge_time: new Date(),
         is_flexible_spending: false
       };

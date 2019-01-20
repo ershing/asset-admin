@@ -1,114 +1,226 @@
 <template>
   <div>
+    <header style="marginBottom:10px;">
+      <Input v-model="value" placeholder="请输入新增的分类" style="width:200px;marginRight:10px;"></Input>
+      <Button type="success" @click="createClass">新增</Button>
+    </header>
+    <section style="marginBottom:10px;">
+      <Tag
+        v-for="ele of spendingClassDict.filter(ele => ele)"
+        :key="ele.id"
+        :name="ele.id"
+        type="border"
+        color="success"
+        closable
+        @on-close="delClass"
+      >{{ele.value}}</Tag>
+    </section>
     <Card>
       <div class="drag-box-card">
-
-        <!-- 切记设置list1和list2属性时，一定要添加.sync修饰符 -->
-        <drag-list :list1.sync="list1" :list2.sync="list2" :dropConClass="dropConClass" @on-change="handleChange">
-          <h3 slot="left-title">待办事项</h3>
-          <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.name }}</Card>
-          <h3 slot="right-title">完成事项</h3>
-          <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.name }}</Card>
+        <!-- 切记设置spendingList和putList属性时，一定要添加.sync修饰符 -->
+        <drag-list
+          :list1.sync="spendingList"
+          :list2.sync="putList"
+          :dropConClass="dropConClass"
+          @on-change="handleChange"
+        >
+          <h3 slot="left-title">未分类支出大项列表</h3>
+          <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.value }}</Card>
+          <h3 slot="right-title">选择分类：
+            <Select v-model="chosenClassCode" style="width: 200px" @on-change="changeSelectClass">
+              <Option
+                v-for="ele of spendingClassDict.filter(ele => ele)"
+                :key="ele.code"
+                :value="ele.id"
+              >{{ele.value}}</Option>
+            </Select>
+          </h3>
+          <Card class="drag-item" slot="right" slot-scope="right">{{ right.itemRight.value }}</Card>
         </drag-list>
-
-      </div>
-      <div class="handle-log-box">
-        <h3>操作记录</h3>
-        <div class="handle-inner-box">
-          <p v-for="(item, index) in handleList" :key="`handle_item_${index}`">{{ item }}</p>
-        </div>
-      </div>
-      <div class="res-show-box">
-        <pre>{{ list1 }}</pre>
-      </div>
-      <div class="res-show-box">
-        <pre>{{ list2 }}</pre>
       </div>
     </Card>
   </div>
 </template>
 <script>
-import DragList from '_c/drag-list'
-import { getDragList } from '@/api/data'
+import {
+  getAllBaseDict,
+  createDictClass,
+  getDictClass,
+  delDictClass,
+  classifyBaseDict
+} from "@/api/base";
+import DragList from "_c/drag-list";
 export default {
-  name: 'drag_list_page',
+  name: "SpendingClassify",
   components: {
     DragList
   },
-  data () {
+  data() {
     return {
-      list1: [],
-      list2: [],
+      spendingClassDict: [],
+      dict_name: "SPENDING_CLASSIFY",
+      value: "",
+      //标签集合
+      classList: [],
+      spendingList: [],
+      putList: [],
+      //选中类
+      chosenClassCode: "",
       dropConClass: {
-        left: ['drop-box', 'left-drop-box'],
-        right: ['drop-box', 'right-drop-box']
+        left: ["drop-box", "left-drop-box"],
+        right: ["drop-box", "right-drop-box"]
       },
       handleList: []
-    }
+    };
   },
   methods: {
-    handleChange ({ src, target, oldIndex, newIndex }) {
-      this.handleList.push(`${src} => ${target}, ${oldIndex} => ${newIndex}`)
+    refreshDict(dict_id) {
+      getAllBaseDict().then(res => {
+        var dicts = {};
+        res.data &&
+          res.data.data.forEach(ele => {
+            if (!dicts[ele.dict_name]) {
+              dicts[ele.dict_name] = [];
+            }
+            dicts[ele.dict_name][ele.code] = ele;
+          });
+        localStorage.setItem("dicts", JSON.stringify(dicts));
+        this.$root.$dict = dicts;
+        this.getSpendingDict();
+        this.getAllClass(() => {
+          if (this.chosenClassCode === dict_id) {
+            this.chosenClassCode = this.spendingClassDict.length
+              ? this.spendingClassDict[this.spendingClassDict.length - 1].id
+              : "";
+          }
+          this.$nextTick(() => {
+            this.changeSelectClass(this.chosenClassCode);
+          });
+        });
+      });
+    },
+    handleChange({ src, target, oldIndex, newIndex }) {
+      if (src === "left" && target === "right") {
+        // 分类
+        var id = this.putList[newIndex].id;
+        classifyBaseDict({ id, classify_id: this.chosenClassCode })
+          .then(res => {
+            this.$Message.success("分类成功");
+            this.refreshDict();
+          })
+          .catch(e => {
+            this.$Message.error("分类失败");
+            this.refreshDict();
+          });
+      }
+
+      if (src === "right" && target === "left") {
+        //取消分类
+        var id = this.spendingList[newIndex].id;
+        classifyBaseDict({ id, classify_id: "" })
+          .then(res => {
+            this.$Message.success("取消分类成功");
+            this.refreshDict();
+          })
+          .catch(e => {
+            this.$Message.error("取消分类失败");
+            this.refreshDict();
+          });
+      }
+    },
+    changeSelectClass(dict_id) {
+      this.putList = this.$root.$dict.spendingTargetDict.filter(
+        ele => ele.classify_id === dict_id
+      );
+    },
+    delClass(e, dict_id) {
+      delDictClass({ dict_id }).then(res => {
+        if (res.data.status) {
+          this.$Message.success("删除分类成功");
+          this.refreshDict(dict_id);
+        } else {
+          this.$Message.error("删除分类失败");
+        }
+      });
+    },
+    createClass(val) {
+      createDictClass({
+        dict_name: this.dict_name,
+        code: this.spendingClassDict.length
+          ? this.spendingClassDict[this.spendingClassDict.length - 1].code + 1
+          : 1,
+        value: this.value
+      }).then(res => {
+        if (res.data.status) {
+          this.value = "";
+          this.$Message.success("新增分类成功");
+          this.getAllClass(() => {
+            this.chosenClassCode = this.spendingClassDict.length
+              ? this.spendingClassDict[this.spendingClassDict.length - 1].id
+              : "";
+            this.putList = [];
+          });
+        } else {
+          this.$Message.error("新增分类失败");
+        }
+      });
+    },
+    getAllClass(callback) {
+      getDictClass({ dict_name: this.dict_name }).then(res => {
+        if (res.data.status) {
+          this.spendingClassDict = res.data.data;
+          callback && callback();
+        }
+      });
+    },
+    getSpendingDict() {
+      this.spendingList = this.$root.$dict.spendingTargetDict.filter(
+        ele => ele && !ele.classify_id
+      );
     }
   },
-  mounted () {
-    getDragList().then(res => {
-      this.list1 = res.data
-      this.list2 = [res.data[0]]
-      console.log(res.data)
-    })
+  mounted() {
+    this.getSpendingDict();
+    this.getAllClass(() => {
+      this.chosenClassCode = this.spendingClassDict.length
+        ? this.spendingClassDict[0].id
+        : "";
+      if (this.chosenClassCode) {
+        this.changeSelectClass(this.chosenClassCode);
+      }
+    });
   }
-}
+};
 </script>
 <style lang="less">
-.drag-box-card{
+.drag-box-card {
   display: inline-block;
-  width: 600px;
+  // width: 600px;
+  width: 100%;
   height: 560px;
-  .drag-item{
+  .drag-item {
     margin: 10px;
+    padding: 0px;
+    height: 35px;
+    line-height: 5px;
   }
-  h3{
+  h3 {
+    height: 52px;
+    line-height: 30px;
     padding: 10px 15px;
   }
-  .drop-box{
+  .drop-box {
     border: 1px solid #eeeeee;
     height: 455px;
     border-radius: 5px;
-  }
-  .left-drop-box{
-    margin-right: 10px;
-  }
-  .right-drop-box{
-    //
-  }
-}
-.handle-log-box{
-  display: inline-block;
-  margin-left: 20px;
-  border: 1px solid #eeeeee;
-  vertical-align: top;
-  width: 200px;
-  height: 500px;
-  h3{
-    padding: 10px 14px;
-  }
-  .handle-inner-box{
-    height: ~"calc(100% - 44px)";
     overflow: auto;
-    p{
-      padding: 14px 0;
-      margin: 0 14px;
-      border-bottom: 1px dashed #eeeeee;
-    }
   }
-}
-.res-show-box{
-  display: inline-block;
-  margin-left: 20px;
-  border: 1px solid #eeeeee;
-  vertical-align: top;
-  width: 350px;
-  height: 570px;
+  .left-drop-box {
+    margin-right: 20px;
+  }
+  .right-drop-box {
+    //
+
+  }
 }
 </style>

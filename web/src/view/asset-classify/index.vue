@@ -24,9 +24,9 @@
           :dropConClass="dropConClass"
           @on-change="handleChange"
         >
-          <h3 slot="left-title">未分类模块列表</h3>
+          <h3 slot="left-title">未分类资产模块列表</h3>
           <Card class="drag-item" slot="left" slot-scope="left">{{ left.itemLeft.value }}</Card>
-          <h3 slot="right-title">分类：
+          <h3 slot="right-title">选择分类：
             <Select v-model="chosenClassCode" style="width: 200px" @on-change="changeSelectClass">
               <Option
                 v-for="ele of moduleClassDict.filter(ele => ele)"
@@ -93,34 +93,39 @@ export default {
               ? this.moduleClassDict[this.moduleClassDict.length - 1].id
               : "";
           }
+          this.$nextTick(() => {
+            this.changeSelectClass(this.chosenClassCode);
+          });
         });
       });
     },
     handleChange({ src, target, oldIndex, newIndex }) {
       if (src === "left" && target === "right") {
         // 分类
-        var id = this.putList[newIndex];
+        var id = this.putList[newIndex].id;
         classifyBaseDict({ id, classify_id: this.chosenClassCode })
           .then(res => {
             this.$Message.success("分类成功");
+            this.refreshDict();
           })
           .catch(e => {
             this.$Message.error("分类失败");
+            this.refreshDict();
           });
-        this.refreshDict();
       }
 
       if (src === "right" && target === "left") {
         //取消分类
-        var id = this.assetList[newIndex];
+        var id = this.assetList[newIndex].id;
         classifyBaseDict({ id, classify_id: "" })
           .then(res => {
             this.$Message.success("取消分类成功");
+            this.refreshDict();
           })
           .catch(e => {
             this.$Message.error("取消分类失败");
+            this.refreshDict();
           });
-        this.refreshDict();
       }
     },
     changeSelectClass(dict_id) {
@@ -153,6 +158,7 @@ export default {
             this.chosenClassCode = this.moduleClassDict.length
               ? this.moduleClassDict[this.moduleClassDict.length - 1].id
               : "";
+            this.putList = [];
           });
         } else {
           this.$Message.error("新增分类失败");
@@ -179,6 +185,9 @@ export default {
       this.chosenClassCode = this.moduleClassDict.length
         ? this.moduleClassDict[0].id
         : "";
+      if (this.chosenClassCode) {
+        this.changeSelectClass(this.chosenClassCode);
+      }
     });
   }
 };

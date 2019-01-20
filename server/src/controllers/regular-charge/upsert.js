@@ -24,6 +24,8 @@ module.exports = (req, res) => {
     addData.charge_id = req.body.charge_id || uuid();
     addData.account_id =  req.body.charge_id || uuid();
     charge.upsert(addData).then(data => {
+        // 制定的计划按本年度插入相关未来账单
+
         
         res.send({
             status: 1
