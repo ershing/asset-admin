@@ -16,7 +16,6 @@ module.exports = (req, res) => {
             data: data
         })
     }).catch(e => {
-        console.log(e)
         res.send({
             status: 0,
             msg: '数据库错误'
