@@ -45,7 +45,7 @@ module.exports = (req, res) => {
         is_delete: 0,
         asset_id: req.query.asset_id,
         charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() }
-      }, attributes: ['asset_id', 'asset_name', 'belong_module', 'belong_supporter', 'is_credit_class', 'profit', 'create_time']
+      }, attributes: ['asset_id', 'profit', 'create_time']
     }).then(data => {
       callback(null, data)
     }).catch(e => {
@@ -64,19 +64,54 @@ module.exports = (req, res) => {
     })
   }
 
+  function findTargetIndex(list, create_time) {
+    var findIndex = 0;
+    var parseTime = new Date(create_time)
+    if (!list.length || parseTime < new Date(list[0])) {
+      return -1;
+    }
+    list.some((ele, index) => {
+      if (index !== list.length - 1) {
+        if (new Date(list[index].create_time) <= parseTime && parseTime < new Date(list[index + 1].create_time)) {
+          findIndex = index
+          return true;
+        }
+      } else {
+        findIndex = index
+        return true;
+      }
+    })
+    return findIndex
+  }
+
+  function getBaseTrendByCharge(list) {
+    var baseTrend = []
+    list.forEach((ele, index) => {
+      if (index === 0) {
+        baseTrend[0] = {
+          time: list[0].charge_time,
+          profit: list[0].count
+        }
+      } else {
+        baseTrend[index] = {
+          time: list[index].charge_time,
+          profit: baseTrend[index - 1] + list[index].count
+        }
+      }
+    })
+    return baseTrend
+  }
+
+
   function formatTrend(results) {
     var target = results[0]
     var charList = results[1]
-    var assetHistoryList = []
-    assetHistoryList.push({ time: target.create_time, profit: target.profit })
-    charList.forEach(ele => {
-      if (new Date(ele.create_time)){
-
-      }
-    })
+    var findIndex = findTargetIndex(charList, target.create_time)
+    var getMoveDistance = findIndex === -1 ? target.profit : target.profit - charList[findIndex]
+    var assetHistoryList = getBaseTrendByCharge(charList).map(ele => ({ ...ele, profit: ele.profit + getMoveDistance }))
     return res.send({
       status: 1,
-      data: results
+      data: assetHistoryList
     });
   }
 

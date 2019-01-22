@@ -9,7 +9,8 @@ module.exports = (req, res) => {
         target_id,
         count,
         charge_time,
-        is_flexible_spending
+        is_flexible_spending,
+        is_credit_transfer
     } = req.body
     for (let key in addData) {
         if (addData[key] === undefined || addData[key] === null || addData[key] === '' || addData[key] === 0)

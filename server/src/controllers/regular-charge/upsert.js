@@ -2,6 +2,12 @@ const charge = require('../../models/charge');
 const uuid = require('uuid/v4');
 
 module.exports = (req, res) => {
+    var year = (new Date()).getFullYear()
+    if (req.query.year) {
+        year = req.query.year
+    }
+    var yearStart = Date.parse(new Date(year, 0, 1));
+    var yearEnd = Date.parse(new Date(Number(year) + 1, 0, 1)) - 1000;
     var addData = {
         charge_name,
         op_asset_id,
@@ -9,6 +15,7 @@ module.exports = (req, res) => {
         target_id,
         count,
         charge_time,
+        begin_time,
         is_flexible_spending,
         period_type
     } = req.body
@@ -18,16 +25,27 @@ module.exports = (req, res) => {
                 status: 0,
                 msg: '参数错误'
             })
+        if (Number(begin_time) < yearStart || Number(begin_time) > yearEnd) {
+            return res.send({
+                status: 0,
+                msg: '参数错误'
+            })
+        }
     }
     addData.create_time = Date.parse(new Date());
-    addData.begin_time = addData.charge_time;
     addData.is_plan = 1;
     addData.charge_id = req.body.charge_id || uuid();
-    addData.account_id =  req.body.charge_id || uuid();
+    addData.account_id = req.body.charge_id || uuid();
     charge.upsert(addData).then(data => {
         // 制定的计划按本年度插入相关未来账单
         // console.log('ddd', period_type)
-        
+        var yearEnd = Date.parse(new Date())
+        var upsertList = []
+        var targetTime = Number(begin_time)
+        // 以日为周期
+        if (period_type == 1) {
+            if (yearEnd)
+        }
         res.send({
             status: 1
         })
