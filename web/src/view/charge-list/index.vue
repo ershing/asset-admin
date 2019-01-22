@@ -383,7 +383,12 @@ export default {
       insertData.charge_time = Date.parse(insertData.charge_time);
       delete insertData._index;
       delete insertData._rowKey;
-      insertData.is_credit_transfer = this.assetList.filter(ele => ele && ele.asset_id === insertData.target_id)[0].is_credit_class
+      var ifTransfer = this.assetList.filter(
+        ele => ele && ele.asset_id === insertData.target_id
+      )[0];
+      insertData.is_credit_transfer = ifTransfer
+        ? ifTransfer.is_credit_class
+        : false;
       upsertCharge(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");
