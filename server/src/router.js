@@ -46,6 +46,8 @@ router.get('/dict-class/list', require('./controllers/dict/allClass.js'))
 //分类某个基础字典
 router.post('/dict-base/classify', require('./controllers/dict/classificationBase.js'))
 
+//弹性支出
+router.get('spending/flexible', require('./controllers/charge/getFlexibleSpendingTrend.js'))
 
 
 module.exports = router;

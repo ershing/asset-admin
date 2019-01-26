@@ -389,6 +389,9 @@ export default {
       insertData.is_credit_transfer = ifTransfer
         ? ifTransfer.is_credit_class
         : false;
+      if (insertData.charge_type === 2 || insertData.charge_type === 3) {
+        insertData.count = -insertData.count;
+      }
       upsertCharge(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");
