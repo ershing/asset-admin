@@ -47,7 +47,7 @@ export default {
       inforCardData: [
         { title: '月资金流（单位：元）', icon: 'md-person-add', count: 803, color: '#2d8cf0' },
         { title: '月弹性支出（单位：元）', icon: 'md-locate', count: 232, color: '#19be6b' },
-        { title: '年华收益（单位：%）', icon: 'md-help-circle', count: 20, color: '#ff9900' }
+        { title: '年资金增长率（单位：%）', icon: 'md-help-circle', count: 20, color: '#ff9900' }
       ],
       pieData: [
         {value: 135, name: '活期存储'},        
