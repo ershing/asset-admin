@@ -49,5 +49,11 @@ router.post('/dict-base/classify', require('./controllers/dict/classificationBas
 //弹性支出
 router.get('spending/flexible', require('./controllers/charge/getFlexibleSpendingTrend.js'))
 
+//弹性支出总和
+router.get('spending/flexible-count', require('./controllers/charge/getFlexibleSpending.js'))
+
+//资金流
+router.get('asset-charge/flow', require('./controllers/charge/getFlow.js'))
+
 
 module.exports = router;
