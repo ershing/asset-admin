@@ -16,7 +16,7 @@ module.exports = (req, res) => {
             })
     }
     var year = (new Date()).getFullYear()
-    if(req.query.year){
+    if (req.query.year) {
         year = req.query.year
     }
     var yearStart = Date.parse(new Date(year, 0, 1));
@@ -35,7 +35,7 @@ module.exports = (req, res) => {
             'count',
             'charge_time',
             'is_flexible_spending'
-        ], order: [['charge_time', 'DESC']],
+        ], order: [['charge_time', req.query.asc ? 'ASC' : 'DESC']],
         // distinct: true,
     }).then(result => {
         res.send({

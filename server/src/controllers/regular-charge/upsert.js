@@ -85,7 +85,7 @@ module.exports = (req, res) => {
             // 以年为周期
             if (period_type == 5) {
                 // 默认不跨年，只记录当年数据
-                targetTime += 0
+                targetTime += 86400000 * 366
             }
             // 周一到周五
             if (period_type == 6) {
@@ -113,6 +113,12 @@ module.exports = (req, res) => {
         charge.bulkCreate(upsertList).then(bulkRes => {
             res.send({
                 status: 1
+            })
+        }).catch(e => {
+            console.log(e)
+            res.send({
+                status: 0,
+                msg: '数据库错误'
             })
         })
     }).catch(e => {

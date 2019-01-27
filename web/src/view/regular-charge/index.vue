@@ -18,23 +18,59 @@
         </FormItem>
         <FormItem label="操作资产">
           <Select v-model="modalForm.op_asset_id" style="width: 200px">
-            <Option value="beijing">New York</Option>
-            <Option value="shanghai">London</Option>
-            <Option value="shenzhen">Sydney</Option>
+            <Option
+              v-for="ele of assetList"
+              :key="ele.asset_id"
+              :value="ele.asset_id"
+            >{{ele.asset_name}}</Option>
           </Select>
         </FormItem>
         <FormItem label="操作方式">
-          <Select v-model="modalForm.charge_type" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+          <Select
+            v-model="modalForm.charge_type"
+            style="width: 200px"
+            @on-change="modalForm.target_id = 0;"
+          >
+            <Option
+              v-for="ele of $root.$dict.chargeTypeDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="操作目标">
-          <Select v-model="modalForm.target_id" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+          <Select
+            v-if="!modalForm.charge_type || modalForm.charge_type<=1"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of $root.$dict.earnTargetDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
+          </Select>
+          <Select
+            v-if="modalForm.charge_type===2"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of $root.$dict.spendingTargetDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
+          </Select>
+          <Select
+            v-if="modalForm.charge_type===3"
+            v-model="modalForm.target_id"
+            style="width: 200px"
+          >
+            <Option
+              v-for="ele of assetList"
+              :key="ele.asset_id"
+              :value="ele.asset_id"
+            >{{ele.asset_name}}</Option>
           </Select>
         </FormItem>
         <FormItem label="资金总量">
@@ -47,9 +83,11 @@
         </FormItem>
         <FormItem label="记账周期">
           <Select v-model="modalForm.period_type" style="width: 200px">
-            <Option :value="3">New York</Option>
-            <Option :value="1">London</Option>
-            <Option :value="2">Sydney</Option>
+            <Option
+              v-for="ele of $root.$dict.periodTypeDict.filter(ele => ele)"
+              :key="ele.code"
+              :value="ele.code"
+            >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="开始时间">
@@ -81,12 +119,15 @@
 import {
   getRegularCharge,
   upsertRegularCharge,
-  deleteRegularCharge
+  deleteRegularCharge,
+  getAsset
 } from "@/api/base";
 export default {
   name: "RugularCharge",
   data() {
     return {
+      //资产列表
+      assetList: [],
       modalEditType: 0,
       modalVisible: false,
       confirmDeleteVisible: false,
@@ -101,7 +142,7 @@ export default {
         op_asset_id: 0,
         charge_type: 0,
         target_id: 0,
-        count: 0,
+        count: 0.01,
         period_type: 0,
         begin_time: new Date(),
         is_flexible_spending: false
@@ -121,17 +162,55 @@ export default {
         {
           title: "操作资产",
           align: "center",
-          key: "op_asset_id"
+          key: "op_asset_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.assetList.filter(
+                ele => ele.asset_id === params.row.op_asset_id
+              )[0].asset_name
+            );
+          }
         },
         {
           title: "操作方式",
           align: "center",
-          key: "charge_type"
+          key: "charge_type",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.chargeTypeDict.filter(
+                ele => ele && ele.code === params.row.charge_type
+              )[0].value
+            );
+          }
         },
         {
           title: "操作目标",
           align: "center",
-          key: "target_id"
+          key: "target_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              (params.row.target_id &&
+                params.row.charge_type &&
+                {
+                  1: () =>
+                    this.$root.$dict.earnTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  2: () =>
+                    this.$root.$dict.spendingTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  3: () =>
+                    this.assetList.filter(
+                      ele => ele.asset_id === params.row.target_id
+                    )[0].asset_name
+                }[params.row.charge_type]()) ||
+                ""
+            );
+          }
         },
         {
           title: "资金总量",
@@ -144,10 +223,15 @@ export default {
         {
           title: "记账周期",
           align: "center",
-          key: "period_type"
-          // render: (h, params) => {
-          //   return h("span", "￥" + params.row.period_type);
-          // }
+          key: "period_type",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.periodTypeDict.filter(
+                ele => ele && ele.code === params.row.period_type
+              )[0].value
+            );
+          }
         },
         {
           title: "开始时间",
@@ -177,24 +261,24 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
-                  style: {
-                    marginRight: "10px"
-                  },
-                  on: {
-                    click: () => {
-                      this.editModal(params);
-                    }
-                  }
-                },
-                "编辑"
-              ),
+              // h(
+              //   "Button",
+              //   {
+              //     props: {
+              //       type: "success",
+              //       size: "small"
+              //     },
+              //     style: {
+              //       marginRight: "10px"
+              //     },
+              //     on: {
+              //       click: () => {
+              //         this.editModal(params);
+              //       }
+              //     }
+              //   },
+              //   "编辑"
+              // ),
               h(
                 "Button",
                 {
@@ -214,15 +298,11 @@ export default {
           }
         }
       ],
-      data: [
-        {
-          belong_type: 1,
-          profit: 12313.12
-        }
-      ]
+      data: []
     };
   },
   mounted() {
+    this.getAssetList();
     this.getChargeList();
   },
   computed: {
@@ -231,6 +311,13 @@ export default {
     }
   },
   methods: {
+    getAssetList() {
+      getAsset().then(res => {
+        if (res.data.status) {
+          this.assetList = res.data.data || [];
+        }
+      });
+    },
     getChargeList() {
       getRegularCharge().then(res => {
         if (res.data.status) {
@@ -244,7 +331,7 @@ export default {
         op_asset_id: 0,
         charge_type: 0,
         target_id: 0,
-        count: 0,
+        count: 0.01,
         period_type: 0,
         begin_time: new Date(),
         is_flexible_spending: false

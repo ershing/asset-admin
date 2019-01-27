@@ -21,7 +21,6 @@ var dict = sequelize.define('Dict', {
   account_id: {
     type: Sequelize.STRING(36),
     field: 'AccountId',
-    unique: true,
     allowNull: true,
   },
   dict_name: {

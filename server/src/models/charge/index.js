@@ -13,7 +13,6 @@ var charge = sequelize.define('Charge', {
   account_id:{
     type: Sequelize.STRING(36),
     field: 'AccountId',
-    unique: true, 
     allowNull: false,
   },  
   charge_name: {

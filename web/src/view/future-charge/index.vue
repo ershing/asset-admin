@@ -29,7 +29,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table :columns="columns" :data="data"></Table>
+    <Table  v-if="assetList.length" :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="操作资产">
@@ -90,11 +90,13 @@
 </template>
 
 <script>
-import { getCharge, upsertCharge, deleteCharge } from "@/api/base";
+import { getAsset, getCharge, upsertCharge, deleteCharge } from "@/api/base";
 export default {
   name: "AssetEdit",
   data() {
     return {
+      //资产列表
+      assetList: [],      
       modalTitle: "修改记账",
       modalVisible: false,
       confirmDeleteVisible: false,
@@ -139,17 +141,55 @@ export default {
         {
           title: "操作资产",
           align: "center",
-          key: "op_asset_id"
+          key: "op_asset_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.assetList.filter(
+                ele => ele.asset_id === params.row.op_asset_id
+              )[0].asset_name
+            );
+          }
         },
         {
           title: "操作方式",
           align: "center",
-          key: "charge_type"
+          key: "charge_type",
+          render: (h, params) => {
+            return h(
+              "span",
+              this.$root.$dict.chargeTypeDict.filter(
+                ele => ele && ele.code === params.row.charge_type
+              )[0].value
+            );
+          }
         },
         {
           title: "操作目标",
           align: "center",
-          key: "target_id"
+          key: "target_id",
+          render: (h, params) => {
+            return h(
+              "span",
+              (params.row.target_id &&
+                params.row.charge_type &&
+                {
+                  1: () =>
+                    this.$root.$dict.earnTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  2: () =>
+                    this.$root.$dict.spendingTargetDict.filter(
+                      ele => ele && ele.code === params.row.target_id
+                    )[0].value,
+                  3: () =>
+                    this.assetList.filter(
+                      ele => ele.asset_id === params.row.target_id
+                    )[0].asset_name
+                }[params.row.charge_type]()) ||
+                ""
+            );
+          }
         },
         {
           title: "资金总量",
@@ -227,10 +267,18 @@ export default {
     };
   },
   mounted() {
+    this.getAssetList();    
     this.initSelectedTime();
     this.formatTimeSearch();
   },
   methods: {
+    getAssetList() {
+      getAsset().then(res => {
+        if (res.data.status) {
+          this.assetList = res.data.data || [];
+        }
+      });
+    },    
     initSelectedTime() {
       var date = new Date();
       var firstDate = new Date(
@@ -276,6 +324,7 @@ export default {
           )
         ) - 1000;
       this.getChargeList({
+        asc: true,
         start_charge_time,
         end_charge_time,
         page,
@@ -286,6 +335,7 @@ export default {
       getCharge(params).then(res => {
         if (res.data.status) {
           this.data = res.data.data || [];
+          this.total = res.data.total || 0;
         }
       });
     },

@@ -7,7 +7,14 @@ module.exports = (req, res) => {
             msg: '参数错误'
         })
     }
-    charge.update({ is_delete: 1 }, { where: { charge_id: req.body.charge_id, is_plan: 1 } }).then(data => {
+    charge.update({ is_delete: 1 }, {
+        where: {
+            $or: [
+                { charge_id: req.body.charge_id, is_plan: 1 },
+                { plan_charge_id: req.body.charge_id }
+            ]
+        }
+    }).then(data => {
         res.send({
             status: 1
         })
