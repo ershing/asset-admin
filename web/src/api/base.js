@@ -8,6 +8,23 @@ export const getAllBaseDict = () => {
     })
 }
 
+//首页
+export const getFlow = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'asset-charge/flow',
+        params,
+    })
+}
+
+export const getFlexibleCount = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'spending/flexible-count',
+        params,
+    })
+}
+
 //资产
 export const getAsset = (params) => {
     return axios.request({
@@ -115,3 +132,4 @@ export const classifyBaseDict = (data) => {
         data,
     })
 }
+

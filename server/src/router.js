@@ -55,5 +55,8 @@ router.get('spending/flexible-count', require('./controllers/charge/getFlexibleS
 //资金流
 router.get('asset-charge/flow', require('./controllers/charge/getFlow.js'))
 
+//现在价值
+router.get('asset/now-profit', require('./controllers/asset/getNowProfit.js'))
+
 
 module.exports = router;
