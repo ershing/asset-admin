@@ -87,15 +87,17 @@
               v-for="ele of $root.$dict.periodTypeDict.filter(ele => ele)"
               :key="ele.code"
               :value="ele.code"
+              @on-change="modalForm.begin_time = '';"
             >{{ele.value}}</Option>
           </Select>
         </FormItem>
         <FormItem label="开始时间">
           <DatePicker
             type="date"
-            placeholder="Select date"
+            placeholder="请选择"
             v-model="modalForm.begin_time"
             style="width: 200px"
+            :options="datePickerOptions"
           ></DatePicker>
         </FormItem>
         <FormItem label="固弹支出">
@@ -125,6 +127,7 @@ import {
 export default {
   name: "RugularCharge",
   data() {
+    var that = this;
     return {
       //资产列表
       assetList: [],
@@ -144,8 +147,22 @@ export default {
         target_id: 0,
         count: 0.01,
         period_type: 0,
-        begin_time: new Date(),
+        begin_time: '',
         is_flexible_spending: false
+      },
+      datePickerOptions: {
+        disabledDate(date) {
+          var today = new Date()
+          var inner = date.valueOf() < Date.now() || date.valueOf() > Date.parse(new Date(today.getFullYear(), 11, 31))
+          var plus = false
+          if(that.modalForm.period_type === 6){
+            plus = date.getDay() === 6 || date.getDay() === 0
+          }
+          if(that.modalForm.period_type === 7){
+            plus = date.getDay() >= 1 && date.getDay() <= 5
+          }
+          return inner || plus;
+        }
       },
       columns: [
         {
@@ -333,7 +350,7 @@ export default {
         target_id: 0,
         count: 0.01,
         period_type: 0,
-        begin_time: new Date(),
+        begin_time: '',
         is_flexible_spending: false
       };
     },
@@ -347,6 +364,15 @@ export default {
       delete insertData._index;
       delete insertData._rowKey;
       insertData.begin_time = Date.parse(insertData.begin_time);
+      var ifTransfer = this.assetList.filter(
+        ele => ele && ele.asset_id === insertData.target_id
+      )[0];
+      insertData.is_credit_transfer = ifTransfer
+        ? ifTransfer.is_credit_class
+        : false;
+      if (insertData.charge_type === 2 || insertData.charge_type === 3) {
+        insertData.count = -insertData.count;
+      }      
       upsertRegularCharge(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");

@@ -152,7 +152,8 @@ export default {
       },
       datePickerOptions: {
         disabledDate(date) {
-          return date && date.valueOf() > Date.now();
+          var today = new Date();
+          return date.valueOf() > Date.now() || date.getFullYear() < today.getFullYear();
         }
       },
       modalForm: {
@@ -165,7 +166,7 @@ export default {
         is_flexible_spending: false
       },
       total: 0,
-      limit: 5,
+      limit: 10,
       columns: [
         {
           type: "index",

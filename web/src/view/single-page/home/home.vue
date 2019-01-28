@@ -90,14 +90,17 @@ export default {
     };
   },
   mounted() {
-    //
+    this.getMonthFlow();
+    this.getMonthFlexibleSpending();
   },
   methods: {
     getMonthFlow() {
       var today = new Date();
       var params = {
-        start_charge_time: new Date(today.getFullYear(), today.getMonth(), 1),
-        end_charge_time: today
+        start_charge_time: Date.parse(
+          new Date(today.getFullYear(), today.getMonth(), 1)
+        ),
+        end_charge_time: Date.parse(today)
       };
       getFlow(params).then(res => {
         if (res.data.status) {
@@ -108,8 +111,10 @@ export default {
     getMonthFlexibleSpending() {
       var today = new Date();
       var params = {
-        start_charge_time: new Date(today.getFullYear(), today.getMonth(), 1),
-        end_charge_time: today
+        start_charge_time: Date.parse(
+          new Date(today.getFullYear(), today.getMonth(), 1)
+        ),
+        end_charge_time: Date.parse(today)
       };
       getFlexibleCount().then(res => {
         if (res.data.status) {

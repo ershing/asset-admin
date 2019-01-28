@@ -47,16 +47,16 @@ router.get('/dict-class/list', require('./controllers/dict/allClass.js'))
 router.post('/dict-base/classify', require('./controllers/dict/classificationBase.js'))
 
 //弹性支出
-router.get('spending/flexible', require('./controllers/charge/getFlexibleSpendingTrend.js'))
+router.get('/spending/flexible', require('./controllers/charge/getFlexibleSpendingTrend.js'))
 
 //弹性支出总和
-router.get('spending/flexible-count', require('./controllers/charge/getFlexibleSpending.js'))
+router.get('/spending/flexible-count', require('./controllers/charge/getFlexibleSpending.js'))
 
 //资金流
-router.get('asset-charge/flow', require('./controllers/charge/getFlow.js'))
+router.get('/asset-charge/flow', require('./controllers/charge/getFlow.js'))
 
 //现在价值
-router.get('asset/now-profit', require('./controllers/asset/getNowProfit.js'))
+router.get('/asset/now-profit', require('./controllers/asset/getNowProfit.js'))
 
 
 module.exports = router;

@@ -29,7 +29,7 @@ module.exports = (req, res) => {
     var counts = data.reduce((a, b) => (a + b.count), 0)
     return res.send({
       status: 1,
-      msg: -counts
+      data: -counts
     })
   }).catch(e => {
     callback(e)

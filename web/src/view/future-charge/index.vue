@@ -29,7 +29,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table  v-if="assetList.length" :columns="columns" :data="data"></Table>
+    <Table v-if="assetList.length" :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="操作资产">
@@ -96,7 +96,7 @@ export default {
   data() {
     return {
       //资产列表
-      assetList: [],      
+      assetList: [],
       modalTitle: "修改记账",
       modalVisible: false,
       confirmDeleteVisible: false,
@@ -111,12 +111,17 @@ export default {
         disabledDate(date) {
           var dateNow = new Date();
           return (
-            date &&
-            date.valueOf() <
-              Date.parse(
-                new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate())
-              ) +
-                86400000
+            (date &&
+              date.valueOf() <
+                Date.parse(
+                  new Date(
+                    dateNow.getFullYear(),
+                    dateNow.getMonth(),
+                    dateNow.getDate()
+                  )
+                ) +
+                  86400000) ||
+            date.getFullYear() > dateNow.getFullYear()
           );
         }
       },
@@ -130,7 +135,7 @@ export default {
         is_flexible_spending: false
       },
       total: 0,
-      limit: 5,
+      limit: 10,
       columns: [
         {
           type: "index",
@@ -267,7 +272,7 @@ export default {
     };
   },
   mounted() {
-    this.getAssetList();    
+    this.getAssetList();
     this.initSelectedTime();
     this.formatTimeSearch();
   },
@@ -278,7 +283,7 @@ export default {
           this.assetList = res.data.data || [];
         }
       });
-    },    
+    },
     initSelectedTime() {
       var date = new Date();
       var firstDate = new Date(

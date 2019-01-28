@@ -66,7 +66,7 @@ module.exports = (req, res) => {
                 var baseTargetDate = new Date(targetTime)
                 if (baseTargetDate.getMonth() === 11) break;
                 // 获取下月天数
-                var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 1, 0)).getDate();
+                var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 2, 0)).getDate();
                 // 计算下月的日子
                 var markDate = baseDate > nextMonthDays ? nextMonthDays : baseDate;
                 targetTime = Date.parse(new Date(year, baseTargetDate.getMonth() + 1, markDate))
@@ -77,7 +77,7 @@ module.exports = (req, res) => {
                 var baseTargetDate = new Date(targetTime)
                 if (baseTargetDate.getMonth() === 9) break;
                 // 获取下季当月天数
-                var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 3, 0)).getDate();
+                var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 4, 0)).getDate();
                 // 计算下季当月的日子
                 var markDate = baseDate > nextMonthDays ? nextMonthDays : baseDate;
                 targetTime = Date.parse(new Date(year, baseTargetDate.getMonth() + 3, markDate))
