@@ -64,7 +64,7 @@ module.exports = (req, res) => {
             if (period_type == 3) {
                 // 基准日
                 var baseTargetDate = new Date(targetTime)
-                if (baseTargetDate.getMonth() === 11) return;
+                if (baseTargetDate.getMonth() === 11) break;
                 // 获取下月天数
                 var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 1, 0)).getDate();
                 // 计算下月的日子
@@ -75,7 +75,7 @@ module.exports = (req, res) => {
             if (period_type == 4) {
                 // 基准日
                 var baseTargetDate = new Date(targetTime)
-                if (baseTargetDate.getMonth() === 9) return;
+                if (baseTargetDate.getMonth() === 9) break;
                 // 获取下季当月天数
                 var nextMonthDays = (new Date(year, baseTargetDate.getMonth() + 3, 0)).getDate();
                 // 计算下季当月的日子
@@ -97,6 +97,12 @@ module.exports = (req, res) => {
                 if (baseDay == 5) {
                     targetTime += 86400000 * 3
                 }
+                if (baseDay == 6) {
+                    targetTime += 86400000 * 2
+                }
+                if (baseDay == 0) {
+                    targetTime += 86400000 * 1
+                }
             }
             // 周六周日
             if (period_type == 7) {
@@ -104,9 +110,8 @@ module.exports = (req, res) => {
                 var baseDay = baseTargetDate.getDay();
                 if (baseDay == 6) {
                     targetTime += 86400000
-                }
-                if (baseDay == 0) {
-                    targetTime += 86400000 * 6
+                } else {
+                    targetTime += 86400000 * (6 - baseDay)
                 }
             }
         }
