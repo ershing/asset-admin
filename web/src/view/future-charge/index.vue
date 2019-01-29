@@ -29,7 +29,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table v-if="assetList.length" :columns="columns" :data="data"></Table>
+    <Table :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="操作资产">

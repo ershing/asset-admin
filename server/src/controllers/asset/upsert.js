@@ -17,8 +17,9 @@ module.exports = (req, res) => {
                 msg: '参数错误'
             })
     }
+
     addData.asset_id = req.body.asset_id || uuid();
-    addData.account_id =  req.body.asset_id || uuid();
+    addData.account_id = req.body.asset_id || uuid();
     asset.upsert(addData).then(data => {
         res.send({
             status: 1

@@ -39,12 +39,12 @@ module.exports = (req, res) => {
   });
 
 
-  function checkAssetBase() {
+  function checkAssetBase(callback) {
     asset.findOne({
       where: {
         is_delete: 0,
         asset_id: req.query.asset_id,
-        charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() }
+        create_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() }
       }, attributes: ['asset_id', 'profit', 'create_time']
     }).then(data => {
       callback(null, data)
@@ -53,9 +53,13 @@ module.exports = (req, res) => {
     })
   }
 
-  function getChargeList() {
+  function getChargeList(callback) {
     charge.findAll({
-      where: { is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }] },
+      where: {
+        is_delete: 0,
+        charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() },
+        $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }]
+      },
       order: [['charge_time', 'ASC']],
     }).then(data => {
       callback(null, data)
@@ -72,7 +76,7 @@ module.exports = (req, res) => {
     }
     list.some((ele, index) => {
       if (index !== list.length - 1) {
-        if (new Date(list[index].create_time) <= parseTime && parseTime < new Date(list[index + 1].create_time)) {
+        if (new Date(list[index].charge_time) <= parseTime && parseTime < new Date(list[index + 1].charge_time)) {
           findIndex = index
           return true;
         }
@@ -93,10 +97,11 @@ module.exports = (req, res) => {
     var profit = target.profit;
     while (initIndex <= charList.length - 1) {
       profit += charList[initIndex].count
+      initIndex++;
     }
     return res.send({
       status: 1,
-      data: profit
+      data: parseFloat(profit.toFixed(2))
     });
   }
 

@@ -1,4 +1,5 @@
 const asset = require('../../models/asset');
+const charge = require('../../models/charge');
 
 module.exports = (req, res) => {
     if (!req.body.asset_id) {
@@ -8,8 +9,17 @@ module.exports = (req, res) => {
         })
     }
     asset.update({ is_delete: 1 }, { where: { asset_id: req.body.asset_id } }).then(data => {
-        res.send({
-            status: 1
+        charge.update({ is_delete: 1 }, {
+            where: {
+                $or: [
+                    { op_asset_id: req.body.asset_id },
+                    { target_id: req.body.asset_id },
+                ]
+            }
+        }).then(data => {
+            res.send({
+                status: 1
+            })
         })
     }).catch(e => {
         res.send({

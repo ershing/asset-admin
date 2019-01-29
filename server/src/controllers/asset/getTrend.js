@@ -39,12 +39,12 @@ module.exports = (req, res) => {
   });
 
 
-  function checkAssetBase() {
+  function checkAssetBase(callback) {
     asset.findOne({
       where: {
         is_delete: 0,
         asset_id: req.query.asset_id,
-        charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() }
+        create_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() }
       }, attributes: ['asset_id', 'profit', 'create_time']
     }).then(data => {
       callback(null, data)
@@ -53,7 +53,7 @@ module.exports = (req, res) => {
     })
   }
 
-  function getChargeList() {
+  function getChargeList(callback) {
     charge.findAll({
       where: { is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }] },
       order: [['charge_time', 'ASC']],
@@ -72,7 +72,7 @@ module.exports = (req, res) => {
     }
     list.some((ele, index) => {
       if (index !== list.length - 1) {
-        if (new Date(list[index].create_time) <= parseTime && parseTime < new Date(list[index + 1].create_time)) {
+        if (new Date(list[index].charge_time) <= parseTime && parseTime < new Date(list[index + 1].charge_time)) {
           findIndex = index
           return true;
         }
@@ -95,7 +95,7 @@ module.exports = (req, res) => {
       } else {
         baseTrend[index] = {
           time: list[index].charge_time,
-          profit: baseTrend[index - 1] + list[index].count
+          profit: parseFloat((baseTrend[index - 1].profit + list[index].count).toFixed(2))
         }
       }
     })
@@ -107,8 +107,8 @@ module.exports = (req, res) => {
     var target = results[0]
     var charList = results[1]
     var findIndex = findTargetIndex(charList, target.create_time)
-    var getMoveDistance = findIndex === -1 ? target.profit : target.profit - charList[findIndex]
-    var assetHistoryList = getBaseTrendByCharge(charList).map(ele => ({ ...ele, profit: ele.profit + getMoveDistance }))
+    var getMoveDistance = findIndex === -1 ? target.profit : target.profit - charList[findIndex].count
+    var assetHistoryList = getBaseTrendByCharge(charList).map(ele => ({ ...ele, profit: parseFloat((ele.profit + getMoveDistance).toFixed(2)) }))
     return res.send({
       status: 1,
       data: assetHistoryList

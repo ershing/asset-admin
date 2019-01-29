@@ -29,7 +29,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table v-if="assetList.length" :columns="columns" :data="data"></Table>
+    <Table :columns="columns" :data="data"></Table>
     <Modal
       v-draggable="options"
       v-model="modalVisible"
@@ -63,6 +63,12 @@
             >{{ele.value}}</Option>
           </Select>
         </FormItem>
+        <FormItem v-if="modalForm.charge_type===2" label="固弹支出">
+          <i-switch v-model="modalForm.is_flexible_spending" size="large">
+            <span slot="open">弹性</span>
+            <span slot="close">固定</span>
+          </i-switch>
+        </FormItem>        
         <FormItem label="操作目标">
           <Select
             v-if="!modalForm.charge_type || modalForm.charge_type<=1"
@@ -113,12 +119,6 @@
             v-model="modalForm.charge_time"
             style="width: 200px"
           ></DatePicker>
-        </FormItem>
-        <FormItem label="固弹支出">
-          <i-switch v-model="modalForm.is_flexible_spending" size="large">
-            <span slot="open">弹性</span>
-            <span slot="close">固定</span>
-          </i-switch>
         </FormItem>
       </Form>
     </Modal>

@@ -35,7 +35,7 @@ export default {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          formatter: '{b} : <br/>{c}元 （{d}%）'
         },
         legend: {
           orient: 'vertical',

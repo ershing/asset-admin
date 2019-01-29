@@ -55,8 +55,13 @@ router.get('/spending/flexible-count', require('./controllers/charge/getFlexible
 //资金流
 router.get('/asset-charge/flow', require('./controllers/charge/getFlow.js'))
 
+//资金趋势
+router.get('/asset/trend', require('./controllers/asset/getTrend.js'))
+
 //现在价值
 router.get('/asset/now-profit', require('./controllers/asset/getNowProfit.js'))
 
+//最初价值
+router.get('/asset/origin-profit', require('./controllers/asset/getOriginProfit.js'))
 
 module.exports = router;

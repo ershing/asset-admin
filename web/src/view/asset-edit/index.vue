@@ -76,7 +76,7 @@
       v-model="confirmDeleteVisible"
       title="警告"
       @on-ok="confirmDelete"
-    >是否确认删除资产数据？</Modal>
+    >此操作将删除此资产相关的所有记账记录，是否确认删除资产数据？</Modal>
   </div>
 </template>
 
@@ -146,9 +146,26 @@ export default {
           }
         },
         {
-          title: "资金余额",
+          title: "创建资金额",
           align: "center",
           key: "profit",
+          render: (h, params) => {
+            return h("span", "￥" + params.row.profit.toFixed(2));
+          }
+        },        
+        {
+          title: "对应创建时间",
+          align: "center",
+          key: "create_time",
+          render: (h, params) => {
+            var times = params.row.create_time.split(" ");
+            return h("span", times[0]);
+          }
+        },        
+        {
+          title: "资金余额",
+          align: "center",
+          key: "now_profit",
           render: (h, params) => {
             return h("span", "￥" + params.row.profit.toFixed(2));
           }
@@ -232,6 +249,8 @@ export default {
     confirmModal() {
       var insertData = { ...this.modalForm };
       insertData.create_time = Date.parse(insertData.create_time);
+      delete insertData._index
+      delete insertData._rowKey
       upsertAsset(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");

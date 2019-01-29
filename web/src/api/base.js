@@ -50,6 +50,30 @@ export const deleteAsset = (data) => {
     })
 }
 
+export const assetNowProfit = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'asset/now-profit',
+        params,
+    })
+}
+
+export const assetOriginProfit = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'asset/origin-profit',
+        params,
+    })
+}
+
+export const assetTrend = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'asset/trend',
+        params,
+    })
+}
+
 //账单
 export const getCharge = (params) => {
     return axios.request({

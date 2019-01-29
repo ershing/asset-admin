@@ -19,7 +19,7 @@ var asset = sequelize.define('Asset', {
     type: Sequelize.STRING(30),
     field: 'AssetName',
     allowNull: false,
-    unique: true //资产名称不能重复
+    // unique: true //资产名称不能重复
   },  
   belong_supporter: {
     type: Sequelize.INTEGER,
