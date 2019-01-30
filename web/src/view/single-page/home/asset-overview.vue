@@ -11,6 +11,10 @@ export default {
     return {
       dom: null,
       option: {
+        title: {
+          text: "各项资产增长率",
+          x: 'center'
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: {

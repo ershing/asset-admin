@@ -140,7 +140,29 @@ export default {
     },
     formatTheMap(assetData) {
       var series = [];
-      assetData.forEach(ele => {
+      var colors = [
+        "#ffff00",
+        "#ffcc33",
+        "#ff9966",
+        "#ff6699",
+        "#ff33cc",
+        "#ff00ff",
+        "#9900ff",
+        "#9933cc",
+        "#996699",
+        "#999966",
+        "#99cc33",
+        "#99ff00",
+        "#00ff33",
+        "#00cc66",
+        "#009999",
+        "#0066cc",
+        "#0033ff",
+        "#3300ff",
+        "#3300cc",
+        "#330099"
+      ];
+      assetData.forEach((ele, index) => {
         assetTrend({ asset_id: ele.asset_id }).then(res => {
           if (res.data.status) {
             var monthData = [];
@@ -152,20 +174,40 @@ export default {
                 monthData[timeMonth] = ele.profit;
               }
             });
+
+            var countBase = 0;
+            var baseNum = 0;
+            var formatRate = monthData.map((ele, index) => {
+              if (!ele || ele == 0) {
+                countBase++;
+                return 0;
+              } else {
+                if (index === countBase) {
+                  baseNum = ele;
+                  return 0;
+                } else {
+                  return parseFloat((ele / baseNum).toFixed(2));
+                }
+              }
+            });
+
             series.push({
               name: ele.asset_name,
               type: "line",
               stack: "总量",
               areaStyle: {
                 normal: {
-                  color: "#2d8cf0"
+                  color:
+                    index > colors.length - 1
+                      ? colors[colors.length - 1]
+                      : colors[index]
                 }
               },
-              data: monthData
+              data: formatRate
             });
             if (series.length === assetData.length) {
-              this.$refs.overview.option.series = series
-              this.$refs.overview.loadMap()
+              this.$refs.overview.option.series = series;
+              this.$refs.overview.loadMap();
             }
           }
         });
