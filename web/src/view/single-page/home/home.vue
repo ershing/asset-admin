@@ -166,12 +166,16 @@ export default {
         assetTrend({ asset_id: ele.asset_id }).then(res => {
           if (res.data.status) {
             var monthData = [];
-            res.data.data.forEach(ele => {
-              var timeMonth = new Date(ele.time).getMonth();
-              if (monthData[timeMonth] !== undefined) {
-                monthData[timeMonth] += ele.profit;
+            res.data.data.forEach((ele, ind) => {
+              var timeMonth = new Date(ele.time).getMonth() + 1;
+              if (ind === 0) {
+                monthData[timeMonth - 1] = ele.profit;
               } else {
-                monthData[timeMonth] = ele.profit;
+                if (monthData[timeMonth] !== undefined) {
+                  monthData[timeMonth] += ele.profit;
+                } else {
+                  monthData[timeMonth] = ele.profit;
+                }
               }
             });
 

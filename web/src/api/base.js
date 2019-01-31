@@ -99,6 +99,14 @@ export const deleteCharge = (data) => {
     })
 }
 
+export const getByChargeType = (params) => {
+    return axios.request({
+        method: 'get',
+        url: 'charge/charge-type',
+        params,
+    })
+}
+
 //定期账单
 export const getRegularCharge = (params) => {
     return axios.request({

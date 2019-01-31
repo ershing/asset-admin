@@ -1,43 +1,30 @@
 <template>
   <div>
     <div style="margin-bottom:10px;overflow:hidden;">
-      <DatePicker
-        v-model="selected_get_time"
-        type="daterange"
-        :clearable="false"
-        placement="bottom-end"
-        placeholder="选择时间范围"
-        style="float: right;width: 200px;"
-        :options="datePickerOptions"
-        @on-change="changeSelectedTime"
-      ></DatePicker>
+      <Select v-model="chooseGetMonth" style="float: right;width: 200px" @on-change="changeMonth(1)">
+        <Option v-for="ele of countMonths" :key="ele.key" :value="ele.key">{{ele.value}}</Option>
+      </Select>
     </div>
     <Row>
       <Card shadow>
-        <div ref="chart-get-overview" style="height: 600px;"></div>
+        <div ref="chart-get-overview" style="height: 700px;"></div>
       </Card>
     </Row>
-    <div style="margin-bottom:10px;overflow:hidden;">
-      <DatePicker
-        v-model="selected_spend_time"
-        type="daterange"
-        :clearable="false"
-        placement="bottom-end"
-        placeholder="选择时间范围"
-        style="float: right;width: 200px;"
-        :options="datePickerOptions"
-        @on-change="changeSelectedTime"
-      ></DatePicker>
+    <div style="margin:20px 0 10px;overflow:hidden;">
+      <Select v-model="chooseSpendMonth" style="float: right;width: 200px" @on-change="changeMonth(2)">
+        <Option v-for="ele of countMonths" :key="ele.key" :value="ele.key">{{ele.value}}</Option>
+      </Select>
     </div>
     <Row>
       <Card shadow>
-        <div ref="chart-spend-overview" style="height: 600px;"></div>
+        <div ref="chart-spend-overview" style="height: 700px;"></div>
       </Card>
     </Row>
   </div>
 </template>
 
 <script>
+import { getByChargeType } from "@/api/base";
 import echarts from "echarts";
 import { on, off } from "@/libs/tools";
 export default {
@@ -47,15 +34,29 @@ export default {
       dom: null,
       spendDom: null,
       // 选择的时间范围
-      selected_get_time: [],
-      selected_spend_time: [],
-      option: {
+      chooseGetMonth: "",
+      chooseSpendMonth: "",
+      countMonths: [],
+      datePickerOptions: {
+        disabledDate(date) {
+          var today = new Date();
+          return (
+            date.valueOf() > Date.now() ||
+            date.getFullYear() < today.getFullYear()
+          );
+        }
+      },
+      getOption: {
+        title: {
+          text: "月收入概览",
+          x: "left"
+        },
         tooltip: {
           trigger: "axis"
         },
         toolbox: {
           show: true,
-          y: "bottom",
+          y: "top",
           feature: {
             mark: { show: true },
             dataView: { show: true, readOnly: false },
@@ -66,23 +67,13 @@ export default {
         },
         calculable: true,
         legend: {
-          data: [
-            "直接访问",
-            "邮件营销",
-            "联盟广告",
-            "视频广告",
-            "搜索引擎",
-            "百度",
-            "谷歌",
-            "必应",
-            "其他"
-          ]
+          data: []
         },
         xAxis: [
           {
             type: "category",
             splitLine: { show: false },
-            data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+            data: []
           }
         ],
         yAxis: [
@@ -91,63 +82,46 @@ export default {
             position: "right"
           }
         ],
-        series: [
-          {
-            name: "直接访问",
-            type: "bar",
-            data: [320, 332, 301, 334, 390, 330, 320]
-          },
-          {
-            name: "邮件营销",
-            type: "bar",
-            tooltip: { trigger: "item" },
-            stack: "广告",
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: "联盟广告",
-            type: "bar",
-            tooltip: { trigger: "item" },
-            stack: "广告",
-            data: [220, 182, 191, 234, 290, 330, 310]
-          },
-          {
-            name: "视频广告",
-            type: "bar",
-            tooltip: { trigger: "item" },
-            stack: "广告",
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: "搜索引擎",
-            type: "line",
-            data: [862, 1018, 964, 1026, 1679, 1600, 1570]
-          },
-
-          {
-            name: "搜索引擎细分",
-            type: "pie",
-            tooltip: {
-              trigger: "item",
-              formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            center: [160, 130],
-            radius: [0, 50],
-            itemStyle: {
-              normal: {
-                labelLine: {
-                  length: 20
-                }
-              }
-            },
-            data: [
-              { value: 1048, name: "百度" },
-              { value: 251, name: "谷歌" },
-              { value: 147, name: "必应" },
-              { value: 102, name: "其他" }
-            ]
+        series: []
+      },
+      spendOption: {
+        title: {
+          text: "月收入概览",
+          x: "left"
+        },
+        tooltip: {
+          trigger: "axis"
+        },
+        toolbox: {
+          show: true,
+          y: "top",
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: false },
+            magicType: { show: true, type: ["line", "bar", "stack", "tiled"] },
+            restore: { show: true },
+            saveAsImage: { show: true }
           }
-        ]
+        },
+        calculable: true,
+        legend: {
+          data: []
+        },
+        xAxis: [
+          {
+            type: "category",
+            splitLine: { show: false },
+            position: "top",
+            data: []
+          }
+        ],
+        yAxis: [
+          {
+            type: "value",
+            position: "right"
+          }
+        ],
+        series: []
       }
     };
   },
@@ -156,30 +130,123 @@ export default {
       this.dom.resize();
       this.spendDom.resize();
     },
-    initSelectedTime() {
-      var date = new Date();
-      var firstDate = new Date(date.getFullYear(), date.getMonth(), 1);
-      var today = new Date(
-        Date.parse(
-          new Date(date.getFullYear(), date.getMonth(), date.getDate())
-        ) + 86399000
-      );
-      this.selected_time = [firstDate, today];
+    initCountMonths() {
+      var todayMonth = new Date().getMonth() + 1;
+      while (todayMonth > 0) {
+        this.countMonths.unshift({ key: todayMonth, value: todayMonth + "月" });
+        todayMonth--;
+      }
+      this.chooseGetMonth = this.countMonths[this.countMonths.length - 1].key;
+      this.chooseSpendMonth = this.countMonths[this.countMonths.length - 1].key;
+    },
+    getBase(byTheType) {
+      var today = new Date();
+      var month =
+        byTheType === 1 ? this.chooseGetMonth - 1 : this.chooseSpendMonth - 1;
+      var year = today.getFullYear();
+      var start_charge_time = Date.parse(new Date(year, month, 1));
+      var end_charge_time = Date.parse(new Date(year, month + 1, 0));
+      getByChargeType({
+        start_charge_time,
+        end_charge_time,
+        charge_type: byTheType
+      }).then(res => {
+        if (res.data.status) {
+          var targetOption = byTheType === 1 ? "getOption" : "spendOption";
+          var data = res.data.data;
+          this[targetOption].title.text =
+            month + 1 + (byTheType === 1 ? "月收入概览" : "月支出概览");
+          var earnTargets = data.map(ele => ele.target_id);
+          var uniqueEarnTargets = [...new Set(earnTargets)];
+          this[targetOption].series = [];
+          var days = new Date(year, month + 1, 0).getDate();
+          this[targetOption].legend.data = uniqueEarnTargets.map(ele => {
+            var name = this.$root.$dict[
+              byTheType === 1 ? "earnTargetDict" : "spendingTargetDict"
+            ].filter(el => el && el.code === ele)[0].value;
+            var datas = [];
+            data.forEach(le => {
+              if (le.target_id === ele) {
+                var monthDate = new Date(le.charge_time).getDate();
+                datas[monthDate] = le.count;
+              }
+            });
+            datas.length = days;
+            for (let count = 0; count < days; count++) {
+              if (!datas[count] && datas[count] !== 0) {
+                datas[count] = 0;
+              }
+            }
+            this[targetOption].series.push({
+              name: name,
+              type: "bar",
+              tooltip: { trigger: "item", formatter: "{b} <br/>{a} : {c}元" },
+              stack: byTheType === 1 ? "收入方式" : "支出方式",
+              data: datas
+            });
+            return name;
+          });
+          this[targetOption].xAxis[0].data = [];
+          while (days > 0) {
+            this[targetOption].xAxis[0].data.unshift(
+              month + 1 + "月" + days + "日"
+            );
+            days--;
+          }
+
+          var pieData = [];
+          // 扇形图
+          this[targetOption].series.forEach(ele => {
+            var count = ele.data.reduce((a, b) => a + b);
+            pieData.push({ value: count, name: ele.name });
+          });
+          this[targetOption].series.push({
+            name: byTheType === 1 ? "收入分类" : "支出分类",
+            type: "pie",
+            tooltip: {
+              trigger: "item",
+              formatter: "{a} <br/>{b} : {c}元（{d}%）"
+            },
+            center: [160, 160],
+            radius: [0, 50],
+            itemStyle: {
+              normal: {
+                labelLine: {
+                  length: 20
+                }
+              }
+            },
+            data: pieData
+          });
+          byTheType === 1 ? this.buildGetMap() : this.buildSpendMap();
+        }
+      });
+    },
+    getEarnTypeCharge() {
+      this.getBase(1);
+    },
+    getSpendTypeCharge() {
+      this.getBase(2);
     },
     buildGetMap() {
       this.dom = echarts.init(this.$refs["chart-get-overview"]);
-      this.dom.setOption(this.option);
+      this.dom.setOption(this.getOption);
       on(window, "resize", this.resize);
     },
     buildSpendMap() {
       this.spendDom = echarts.init(this.$refs["chart-spend-overview"]);
-      this.spendDom.setOption(this.option);
+      this.spendDom.setOption(this.spendOption);
       on(window, "resize", this.resize);
+    },
+    changeMonth(val){
+      this.getBase(val)
     }
   },
   mounted() {
-    this.initSelectedTime();
-    this.buildMap();
+    this.initCountMonths();
+    this.getEarnTypeCharge();
+    this.getSpendTypeCharge();
+    // this.buildSpendMap();
   },
   beforeDestroy() {
     off(window, "resize", this.resize);

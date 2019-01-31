@@ -64,4 +64,7 @@ router.get('/asset/now-profit', require('./controllers/asset/getNowProfit.js'))
 //最初价值
 router.get('/asset/origin-profit', require('./controllers/asset/getOriginProfit.js'))
 
+//记账操作类型获取账单
+router.get('/charge/charge-type', require('./controllers/charge/getByChargeType.js'))
+
 module.exports = router;

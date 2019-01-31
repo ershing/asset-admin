@@ -1,5 +1,5 @@
 <template>
-  <div ref="dom"></div>
+  <div ref="assetDom"></div>
 </template>
 
 <script>
@@ -9,7 +9,7 @@ export default {
   name: "AssetOverview",
   data() {
     return {
-      dom: null,
+      assetDom: null,
       option: {
         title: {
           text: "各项资产增长率",
@@ -63,11 +63,11 @@ export default {
   },
   methods: {
     resize() {
-      this.dom.resize();
+      this.assetDom.resize();
     },
     loadMap() {
-      this.dom = echarts.init(this.$refs.dom);
-      this.dom.setOption(this.option);
+      this.assetDom = echarts.init(this.$refs.assetDom);
+      this.assetDom.setOption(this.option);
       on(window, "resize", this.resize);
     }
   },
