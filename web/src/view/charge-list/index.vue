@@ -68,7 +68,7 @@
             <span slot="open">弹性</span>
             <span slot="close">固定</span>
           </i-switch>
-        </FormItem>        
+        </FormItem>
         <FormItem label="操作目标">
           <Select
             v-if="!modalForm.charge_type || modalForm.charge_type<=1"
@@ -132,11 +132,19 @@
 </template>
 
 <script>
-import { getAsset, getCharge, upsertCharge, deleteCharge } from "@/api/base";
+import {
+  getAsset,
+  getCharge,
+  upsertCharge,
+  deleteCharge,
+  getDictClass
+} from "@/api/base";
 export default {
   name: "ChargeList",
   data() {
     return {
+      //分类字典
+      spendingClassDict: [],
       //资产列表
       assetList: [],
       // 选择的时间范围
@@ -153,7 +161,10 @@ export default {
       datePickerOptions: {
         disabledDate(date) {
           var today = new Date();
-          return date.valueOf() > Date.now() || date.getFullYear() < today.getFullYear();
+          return (
+            date.valueOf() > Date.now() ||
+            date.getFullYear() < today.getFullYear()
+          );
         }
       },
       modalForm: {
@@ -205,6 +216,23 @@ export default {
             );
           }
         },
+        {
+          title: "支出分类",
+          align: "center",
+          // key: "count",
+          render: (h, params) => {
+            if (params.row.charge_type === 1 || params.row.charge_type === 3)
+              return h("span", "——");
+            if (params.row.charge_type === 2)
+              var classify_id = this.$root.$dict.spendingTargetDict.filter(
+                ele => ele && ele.code === params.row.target_id
+              )[0].classify_id;
+            var target = this.spendingClassDict.filter(
+              ele => ele && ele.id === classify_id
+            )[0];
+            return h("span", target ? target.value : "未分类");
+          }
+        },        
         {
           title: "操作目标",
           align: "center",
@@ -260,6 +288,7 @@ export default {
         {
           title: "操作",
           align: "center",
+          minWidth: 80,
           render: (h, params) => {
             return h("div", [
               h(
@@ -303,6 +332,7 @@ export default {
     };
   },
   mounted() {
+    this.getAllClass();
     this.getAssetList();
     this.initSelectedTime();
     this.formatTimeSearch();
@@ -313,6 +343,13 @@ export default {
     }
   },
   methods: {
+    getAllClass(callback) {
+      getDictClass({ dict_name: "SPENDING_CLASSIFY" }).then(res => {
+        if (res.data.status) {
+          this.spendingClassDict = res.data.data;
+        }
+      });
+    },
     getAssetList() {
       getAsset().then(res => {
         if (res.data.status) {

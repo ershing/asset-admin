@@ -130,7 +130,7 @@ export default {
     },
     changeSelectClass(dict_id) {
       this.putList = this.$root.$dict.moduleDict.filter(
-        ele => ele.classify_id === dict_id
+        ele => ele && ele.classify_id === dict_id
       );
     },
     delClass(e, dict_id) {

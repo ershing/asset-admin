@@ -12,7 +12,7 @@ export default {
       assetDom: null,
       option: {
         title: {
-          text: "各项资产增长率",
+          text: "各项资产增长情况",
           x: "center"
         },
         tooltip: {

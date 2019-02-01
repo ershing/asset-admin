@@ -90,11 +90,13 @@
 </template>
 
 <script>
-import { getAsset, getCharge, upsertCharge, deleteCharge } from "@/api/base";
+import { getAsset, getCharge, upsertCharge, deleteCharge, getDictClass  } from "@/api/base";
 export default {
   name: "AssetEdit",
   data() {
     return {
+      //分类字典
+      spendingClassDict: [],
       //资产列表
       assetList: [],
       modalTitle: "修改记账",
@@ -170,6 +172,23 @@ export default {
           }
         },
         {
+          title: "支出分类",
+          align: "center",
+          // key: "count",
+          render: (h, params) => {
+            if (params.row.charge_type === 1 || params.row.charge_type === 3)
+              return h("span", "——");
+            if (params.row.charge_type === 2)
+              var classify_id = this.$root.$dict.spendingTargetDict.filter(
+                ele => ele && ele.code === params.row.target_id
+              )[0].classify_id;
+            var target = this.spendingClassDict.filter(
+              ele => ele && ele.id === classify_id
+            )[0];
+            return h("span", target ? target.value : "未分类");
+          }
+        },
+        {
           title: "操作目标",
           align: "center",
           key: "target_id",
@@ -229,6 +248,7 @@ export default {
         {
           title: "操作",
           align: "center",
+          minWidth: 80,
           render: (h, params) => {
             return h("div", [
               h(
@@ -272,11 +292,19 @@ export default {
     };
   },
   mounted() {
+    this.getAllClass();
     this.getAssetList();
     this.initSelectedTime();
     this.formatTimeSearch();
   },
   methods: {
+    getAllClass(callback) {
+      getDictClass({ dict_name: "SPENDING_CLASSIFY" }).then(res => {
+        if (res.data.status) {
+          this.spendingClassDict = res.data.data;
+        }
+      });
+    },
     getAssetList() {
       getAsset().then(res => {
         if (res.data.status) {

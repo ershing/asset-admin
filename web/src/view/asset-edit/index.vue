@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { getAsset, upsertAsset, deleteAsset } from "@/api/base";
+import { getAsset, upsertAsset, deleteAsset, assetNowProfit } from "@/api/base";
 export default {
   name: "AssetEdit",
   data() {
@@ -152,7 +152,7 @@ export default {
           render: (h, params) => {
             return h("span", "￥" + params.row.profit.toFixed(2));
           }
-        },        
+        },
         {
           title: "对应创建时间",
           align: "center",
@@ -161,13 +161,13 @@ export default {
             var times = params.row.create_time.split(" ");
             return h("span", times[0]);
           }
-        },        
+        },
         {
           title: "资金余额",
           align: "center",
           key: "now_profit",
           render: (h, params) => {
-            return h("span", "￥" + params.row.profit.toFixed(2));
+            return h("span", "￥" + params.row.now_profit.toFixed(2));
           }
         },
         {
@@ -227,7 +227,18 @@ export default {
     getAssetList() {
       getAsset().then(res => {
         if (res.data.status) {
-          this.data = res.data.data || [];
+          var count = 0;
+          res.data.data.forEach(ele => {
+            assetNowProfit({ asset_id: ele.asset_id }).then(res2 => {
+              if (res2.data.status) {
+                ele.now_profit = res2.data.data;
+                count++;
+              }
+              if (count === res.data.data.length) {
+                this.data = res.data.data || [];
+              }
+            });
+          });
         }
       });
     },
@@ -249,8 +260,8 @@ export default {
     confirmModal() {
       var insertData = { ...this.modalForm };
       insertData.create_time = Date.parse(insertData.create_time);
-      delete insertData._index
-      delete insertData._rowKey
+      delete insertData._index;
+      delete insertData._rowKey;
       upsertAsset(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");

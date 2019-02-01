@@ -1,14 +1,13 @@
 <style lang="less">
-@import "./login.less";
+@import "./register.less";
 </style>
 
 <template>
   <div class="login">
     <div class="login-con">
-      <Card icon="log-in" title="欢迎登录" :bordered="false">
+      <Card icon="log-in" title="欢迎注册" :bordered="false">
         <div class="form-con">
           <login-form @on-success-valid="handleSubmit"></login-form>
-          <p class="login-tip" @click="register">注册新用户</p>
         </div>
       </Card>
     </div>
@@ -31,11 +30,6 @@ export default {
             name: this.$config.homeName
           });
         });
-      });
-    },
-    register() {
-      this.$router.push({
-        path: '/register'
       });
     }
   }

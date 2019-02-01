@@ -1,13 +1,13 @@
 <template>
   <div>
-    <Row :gutter="20" style="margin-top: 10px;">
+    <Row :gutter="20">
       <i-col :md="24" :lg="24" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData.length">
           <chart-pie style="height: 600px;" :value="pieData" text="资产模块分类占比"></chart-pie>
         </Card>
       </i-col>
     </Row>
-    <Row :gutter="20" style="margin-top: 10px;">
+    <Row :gutter="20">
       <i-col :md="24" :lg="24" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData2.length">
           <chart-pie style="height: 600px;" :value="pieData2" text="各项资产占比"></chart-pie>
@@ -67,6 +67,14 @@ export default {
                   ...ele
                 });
                 if (saveProfitList.length === assetList.length) {
+                  this.pieData2 = [];
+                  saveProfitList.forEach(ele => {
+                    this.pieData2.push({
+                      value: ele.nowProfit,
+                      name: ele.asset_name
+                    });
+                  });
+
                   var count = 0;
                   saveProfitList.forEach(ele => {
                     assetOriginProfit({ asset_id: ele.asset_id }).then(res3 => {
@@ -75,7 +83,6 @@ export default {
                         count++;
                       }
                       if (count === saveProfitList.length) {
-                        this.pieData2 = [];
                         var formatSaveProfitList = [];
 
                         saveProfitList.forEach(ele => {
@@ -83,39 +90,75 @@ export default {
                             !formatSaveProfitList[ele.belong_module] ||
                             !formatSaveProfitList[ele.belong_module].length
                           ) {
-                            formatSaveProfitList[ele.belong_module][0] = ele;
+                            formatSaveProfitList[ele.belong_module] = [ele];
                           } else {
                             formatSaveProfitList[ele.belong_module].push(ele);
                           }
                         });
 
-                        formatSaveProfitList.forEach(ele => {
-                          var value = 0;
-                          if (ele && ele.length) {
-                            value = ele.reduce((a, b) => a + b.nowProfit, 0);
-                            this.pieData2.push({
-                              value,
-                              name: this.$root.$dict.moduleDict.filter(
-                                el => el && el.code === ele[0].belong_module
-                              )[0].value
-                            });
-                          }
-                        });
-                        // console.log('check', this.pi)
-
                         //分类
-                        // getDictClass({ dict_name: "MODULE_CLASSIFY" }).then(
-                        //   res => {
-                        //     if (res.data.status) {
-                        //       this.pieData = saveProfitList.map(ele => ({
-                        //         value: ele.nowProfit,
-                        //         name: this.$root.$dict.moduleDict.filter(
-                        //           el => el && el.code === ele.belong_module
-                        //         )[0].value
-                        //       }));
-                        //     }
-                        //   }
-                        // );
+                        getDictClass({ dict_name: "MODULE_CLASSIFY" }).then(
+                          res => {
+                            if (res.data.status) {
+                              var ModuleClassDict = res.data.data;
+                              this.pieData = [];
+                              var classFormatList = [];
+                              formatSaveProfitList.forEach((ele, index) => {
+                                if (ele && ele.length) {
+                                  if (
+                                    !classFormatList[
+                                      ModuleClassDict.filter(
+                                        md =>
+                                          md.id ===
+                                          this.$root.$dict.moduleDict.filter(
+                                            el => el && el.code === index
+                                          )[0].classify_id
+                                      )[0].code
+                                    ]
+                                  ) {
+                                    classFormatList[
+                                      ModuleClassDict.filter(
+                                        md =>
+                                          md.id ===
+                                          this.$root.$dict.moduleDict.filter(
+                                            el => el && el.code === index
+                                          )[0].classify_id
+                                      )[0].code
+                                    ] = [ele];
+                                  } else {
+                                    classFormatList[
+                                      ModuleClassDict.filter(
+                                        md =>
+                                          md.id ===
+                                          this.$root.$dict.moduleDict.filter(
+                                            el => el && el.code === index
+                                          )[0].classify_id
+                                      )[0].code
+                                    ].push(ele);
+                                  }
+                                }
+                              });
+
+                              classFormatList.forEach((ele, ind) => {
+                                var value = 0;
+                                if (ele && ele.length) {
+                                  ele.forEach(el => {
+                                    value += el.reduce(
+                                      (a, b) => a + b.nowProfit,
+                                      0
+                                    );
+                                  });
+                                  this.pieData.push({
+                                    value,
+                                    name: ModuleClassDict.filter(
+                                      el => el && el.code === ind
+                                    )[0].value
+                                  });
+                                }
+                              });
+                            }
+                          }
+                        );
 
                         var totalNow = saveProfitList.reduce(
                           (pre, next) => pre + next.nowProfit,
@@ -176,22 +219,6 @@ export default {
               }
             });
 
-            var countBase = 0;
-            var baseNum = 0;
-            var formatRate = monthData.map((ele, index) => {
-              if (!ele || ele == 0) {
-                countBase++;
-                return 0;
-              } else {
-                if (index === countBase) {
-                  baseNum = ele;
-                  return 0;
-                } else {
-                  return parseFloat((ele / baseNum).toFixed(2));
-                }
-              }
-            });
-
             series.push({
               name: ele.asset_name,
               type: "line",
@@ -204,7 +231,7 @@ export default {
                       : colors[index]
                 }
               },
-              data: formatRate
+              data: monthData
             });
             if (series.length === assetData.length) {
               this.$refs.overviews.option.series = series;

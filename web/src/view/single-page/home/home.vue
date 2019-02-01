@@ -18,7 +18,7 @@
     <Row :gutter="20" style="margin-top: 10px;">
       <i-col :md="24" :lg="16" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData.length">
-          <chart-pie style="height: 300px;" :value="pieData" text="资产占比"></chart-pie>
+          <chart-pie style="height: 300px;" :value="pieData" text="资产模块占比"></chart-pie>
         </Card>
       </i-col>
       <i-col :md="24" :lg="8" style="margin-bottom: 20px;">
@@ -112,12 +112,31 @@ export default {
                         count++;
                       }
                       if (count === saveProfitList.length) {
-                        this.pieData = saveProfitList.map(ele => ({
-                          value: ele.nowProfit,
-                          name: this.$root.$dict.moduleDict.filter(
-                            el => el && el.code === ele.belong_module
-                          )[0].value
-                        }));
+                        this.pieData = [];
+                        var formatSaveProfitList = [];
+                        saveProfitList.forEach(ele => {
+                          if (
+                            !formatSaveProfitList[ele.belong_module] ||
+                            !formatSaveProfitList[ele.belong_module].length
+                          ) {
+                            formatSaveProfitList[ele.belong_module] = [ele];
+                          } else {
+                            formatSaveProfitList[ele.belong_module].push(ele);
+                          }
+                        });
+                        formatSaveProfitList.forEach(ele => {
+                          var value = 0;
+                          if (ele && ele.length) {
+                            value = ele.reduce((a, b) => a + b.nowProfit, 0);
+                            this.pieData.push({
+                              value,
+                              name: this.$root.$dict.moduleDict.filter(
+                                el => el && el.code === ele[0].belong_module
+                              )[0].value
+                            });
+                          }
+                        });
+
                         var totalNow = saveProfitList.reduce(
                           (pre, next) => pre + next.nowProfit,
                           0

@@ -28,6 +28,15 @@ export default [
     component: () => import('@/view/login/login.vue')
   },
   {
+    path: '/register',
+    name: 'register',
+    meta: {
+      title: 'Register - 注册',
+      hideInMenu: true
+    },
+    component: () => import('@/view/register/index.vue')
+  },  
+  {
     path: '/',
     name: '_home',
     redirect: '/home',
@@ -139,6 +148,15 @@ export default [
     },
     children: [
       {
+        path: 'asset-proportion',
+        name: '资产概览',
+        meta: {
+          icon: '_qq',
+          title: '资产概览'
+        },
+        component: () => import('@/view/asset-proportion')
+      },
+      {
         path: 'overview',
         name: '收支概览',
         meta: {
@@ -146,25 +164,7 @@ export default [
           title: '收支概览'
         },  
         component: () => import('@/view/chart-overview')
-      },
-      {
-        path: 'asset-proportion',
-        name: '资产占比',
-        meta: {
-          icon: '_qq',
-          title: '资产占比'
-        },
-        component: () => import('@/view/asset-proportion')
-      },
-      {
-        path: 'spending-proportion',
-        name: '支出占比',
-        meta: {
-          icon: '_qq',
-          title: '支出占比'
-        },
-        component: () => import('@/view/spending-proportion')
-      }      
+      }
     ]
   }  
 ]
