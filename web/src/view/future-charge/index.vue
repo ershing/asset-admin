@@ -9,6 +9,7 @@
 <template>
   <div>
     <header class="ctr-header">
+      <Button type="success" @click="exportTable">导出</Button>
       <DatePicker
         v-model="selected_time"
         type="daterange"
@@ -255,7 +256,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "success",
+                    type: "primary",
                     size: "small"
                   },
                   style: {
@@ -414,7 +415,8 @@ export default {
     deleteCharge(params) {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
-    }
+    },
+    exportTable(){}
   }
 };
 </script>

@@ -65,7 +65,7 @@ export default [
     component: Main,
     meta: {
       hideInBread: true,
-      icon: '_qq',
+      icon: 'logo-usd',
       title: '资产管理'      
     },
     children: [
@@ -73,7 +73,7 @@ export default [
         path: 'edit',
         name: '资产列表',
         meta: {
-          icon: '_qq',
+          icon: 'ios-card',
           title: '资产列表'
         },
         component: () => import('@/view/asset-edit')
@@ -82,7 +82,7 @@ export default [
         path: 'module-classify',
         name: '资产模块分类',
         meta: {
-          icon: '_qq',
+          icon: 'ios-paper-outline',
           title: '资产模块分类'
         },
         component: () => import('@/view/asset-classify')
@@ -91,7 +91,7 @@ export default [
         path: 'spending-classify',
         name: '支出大项分类',
         meta: {
-          icon: '_qq',
+          icon: 'md-paper',
           title: '支出大项分类'
         },
         component: () => import('@/view/spending-classify')
@@ -104,7 +104,7 @@ export default [
     component: Main,
     meta: {
       hideInBread: true,
-      icon: '_qq',
+      icon: 'ios-create',
       title: '记账管理'
     },
     children: [
@@ -112,7 +112,7 @@ export default [
         path: 'list',
         name: '记账列表',
         meta: {
-          icon: '_qq',
+          icon: 'md-create',
           title: '记账列表'
         },  
         component: () => import('@/view/charge-list')
@@ -121,7 +121,7 @@ export default [
         path: 'regular',
         name: '记账计划',
         meta: {
-          icon: '_qq',
+          icon: 'md-clipboard',
           title: '记账计划'
         },
         component: () => import('@/view/regular-charge')
@@ -130,7 +130,7 @@ export default [
         path: 'edit',
         name: '未来账单',
         meta: {
-          icon: '_qq',
+          icon: 'md-clock',
           title: '未来账单'
         },
         component: () => import('@/view/future-charge')
@@ -143,7 +143,7 @@ export default [
     component: Main,
     meta: {
       hideInBread: true,
-      icon: '_qq',
+      icon: 'md-options',
       title: '统计图表'
     },
     children: [
@@ -151,7 +151,7 @@ export default [
         path: 'asset-proportion',
         name: '资产概览',
         meta: {
-          icon: '_qq',
+          icon: 'ios-pie',
           title: '资产概览'
         },
         component: () => import('@/view/asset-proportion')
@@ -160,7 +160,7 @@ export default [
         path: 'overview',
         name: '收支概览',
         meta: {
-          icon: '_qq',
+          icon: 'ios-podium',
           title: '收支概览'
         },  
         component: () => import('@/view/chart-overview')

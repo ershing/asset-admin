@@ -9,8 +9,13 @@
   <div>
     <header class="ctr-header">
       <Button type="success" @click="resetModal();modalEditType = 0;modalVisible = true">新建</Button>
+      <Button
+        style="margin-left:10px;"
+        type="success"
+        @click="exportTable"
+      >导出</Button>
     </header>
-    <Table :columns="columns" :data="data"></Table>
+    <Table :columns="columns" :data="data" ref="assetEdit"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="资产名称">
@@ -283,6 +288,9 @@ export default {
     deleteAsset(params) {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
+    },
+    exportTable(){
+      this.$refs.assetEdit.exportCsv({filename: 'ce'})
     }
   }
 };

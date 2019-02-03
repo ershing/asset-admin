@@ -8,7 +8,8 @@
 <template>
   <div>
     <header class="ctr-header">
-      <Button type="primary" @click="resetModal();modalEditType = 0;modalVisible = true">记账</Button>
+      <Button type="success" @click="resetModal();modalEditType = 0;modalVisible = true">记账</Button>
+      <Button style="margin-left:10px;" type="success" @click="exportTable">导出</Button>
       <DatePicker
         v-model="selected_time"
         type="daterange"
@@ -195,12 +196,10 @@ export default {
           align: "center",
           key: "op_asset_id",
           render: (h, params) => {
-            return h(
-              "span",
-              this.assetList.filter(
-                ele => ele.asset_id === params.row.op_asset_id
-              )[0].asset_name
-            );
+            var ass = this.assetList.filter(
+              ele => ele.asset_id === params.row.op_asset_id
+            )[0];
+            return h("span", (ass && ass.asset_name) || "无");
           }
         },
         {
@@ -232,7 +231,7 @@ export default {
             )[0];
             return h("span", target ? target.value : "未分类");
           }
-        },        
+        },
         {
           title: "操作目标",
           align: "center",
@@ -295,7 +294,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "success",
+                    type: "primary",
                     size: "small"
                   },
                   style: {
@@ -451,7 +450,8 @@ export default {
     deleteCharge(params) {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
-    }
+    },
+    exportTable(){}
   }
 };
 </script>
