@@ -3,14 +3,14 @@
     <Row :gutter="20">
       <i-col :md="24" :lg="24" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData.length">
-          <chart-pie style="height: 600px;" :value="pieData" text="资产模块分类占比"></chart-pie>
+          <chart-pie style="height: 600px;" :value="pieData" text="现今资产模块分类占比"></chart-pie>
         </Card>
       </i-col>
     </Row>
     <Row :gutter="20">
       <i-col :md="24" :lg="24" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData2.length">
-          <chart-pie style="height: 600px;" :value="pieData2" text="各项资产占比"></chart-pie>
+          <chart-pie style="height: 600px;" :value="pieData2" text="现今各项资产占比"></chart-pie>
         </Card>
       </i-col>
     </Row>
@@ -60,12 +60,16 @@ export default {
           var assetList = res.data.data || [];
           this.formatTheMap(assetList);
           assetList.forEach(ele => {
-            assetNowProfit({ asset_id: ele.asset_id }).then(res2 => {
+            assetNowProfit({
+              asset_id: ele.asset_id,
+              end_charge_time: Date.parse(new Date())
+            }).then(res2 => {
               if (res2.data.status) {
                 saveProfitList.push({
                   nowProfit: res2.data.data,
                   ...ele
                 });
+
                 if (saveProfitList.length === assetList.length) {
                   this.pieData2 = [];
                   saveProfitList.forEach(ele => {
@@ -160,14 +164,14 @@ export default {
                           }
                         );
 
-                        var totalNow = saveProfitList.reduce(
-                          (pre, next) => pre + next.nowProfit,
-                          0
-                        );
-                        var totalOrigin = saveProfitList.reduce(
-                          (pre, next) => pre + next.originProfit,
-                          0
-                        );
+                        // var totalNow = saveProfitList.reduce(
+                        //   (pre, next) => pre + next.nowProfit,
+                        //   0
+                        // );
+                        // var totalOrigin = saveProfitList.reduce(
+                        //   (pre, next) => pre + next.originProfit,
+                        //   0
+                        // );
                       }
                     });
                   });
@@ -180,59 +184,73 @@ export default {
     },
     formatTheMap(assetData) {
       var series = [];
-      var colors = [
-        "#ffff00",
-        "#ffcc33",
-        "#ff9966",
-        "#ff6699",
-        "#ff33cc",
-        "#ff00ff",
-        "#9900ff",
-        "#9933cc",
-        "#996699",
-        "#999966",
-        "#99cc33",
-        "#99ff00",
-        "#00ff33",
-        "#00cc66",
-        "#009999",
-        "#0066cc",
-        "#0033ff",
-        "#3300ff",
-        "#3300cc",
-        "#330099"
-      ];
+      // var colors = [
+      //   "#ffff00",
+      //   "#ffcc33",
+      //   "#ff9966",
+      //   "#ff6699",
+      //   "#ff33cc",
+      //   "#ff00ff",
+      //   "#9900ff",
+      //   "#9933cc",
+      //   "#996699",
+      //   "#999966",
+      //   "#99cc33",
+      //   "#99ff00",
+      //   "#00ff33",
+      //   "#00cc66",
+      //   "#009999",
+      //   "#0066cc",
+      //   "#0033ff",
+      //   "#3300ff",
+      //   "#3300cc",
+      //   "#330099"
+      // ];
       assetData.forEach((ele, index) => {
-        assetTrend({ asset_id: ele.asset_id }).then(res => {
+        assetTrend({
+          asset_id: ele.asset_id,
+          end_charge_time: Date.parse(new Date())
+        }).then(res => {
           if (res.data.status) {
             var monthData = [];
             res.data.data.forEach((ele, ind) => {
               var timeMonth = new Date(ele.time).getMonth() + 1;
+              var countdown = timeMonth - 2;
               if (ind === 0) {
                 monthData[timeMonth - 1] = ele.profit;
-              } else {
-                if (monthData[timeMonth] !== undefined) {
-                  monthData[timeMonth] += ele.profit;
-                } else {
-                  monthData[timeMonth] = ele.profit;
+                while (countdown >= 0) {
+                  monthData[countdown] = ele.profit;
+                  countdown--;
                 }
+              } else {
+                monthData[timeMonth] = ele.profit;
               }
             });
+
+            //补全数据
+            var toMonth = new Date().getMonth() + 1;
+            while (toMonth > 0) {
+              if (!monthData[toMonth]) {
+                monthData[toMonth] = monthData[toMonth - 1];
+              }
+              toMonth--;
+            }
 
             series.push({
               name: ele.asset_name,
               type: "line",
-              stack: "总量",
-              areaStyle: {
-                normal: {
-                  color:
-                    index > colors.length - 1
-                      ? colors[colors.length - 1]
-                      : colors[index]
-                }
-              },
+              // stack: "总量",
+              // areaStyle: {
+              //   normal: {
+              //     color:
+              //       index > colors.length - 1
+              //         ? colors[colors.length - 1]
+              //         : colors[index]
+              //   }
+              // },
               data: monthData
             });
+            this.$refs.overviews.option.legend.data.push(ele.asset_name)
             if (series.length === assetData.length) {
               this.$refs.overviews.option.series = series;
               this.$refs.overviews.loadMap();

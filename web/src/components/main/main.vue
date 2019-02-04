@@ -46,8 +46,8 @@ import ErrorStore from './components/error-store'
 import { mapMutations, mapActions, mapGetters } from 'vuex'
 import { getNewTagList, routeEqual } from '@/libs/util'
 import routers from '@/router/routers'
-import minLogo from '@/assets/images/logo-min.jpg'
-import maxLogo from '@/assets/images/logo.jpg'
+import minLogo from '@/assets/images/logo-min.png'
+import maxLogo from '@/assets/images/logo.png'
 import './main.less'
 export default {
   name: 'Main',

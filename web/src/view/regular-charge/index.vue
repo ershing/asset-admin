@@ -11,7 +11,7 @@
       <Button type="success" @click="resetModal();modalEditType = 0;modalVisible = true">新增</Button>
       <Button style="margin-left:10px;" type="success" @click="exportTable">导出</Button>
     </header>
-    <Table :columns="columns" :data="data"></Table>
+    <Table ref="regularCharge" :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="计划名称">
@@ -123,13 +123,16 @@ import {
   getRegularCharge,
   upsertRegularCharge,
   deleteRegularCharge,
-  getAsset
+  getAsset,
+  getDictClass
 } from "@/api/base";
 export default {
   name: "RugularCharge",
   data() {
     var that = this;
     return {
+      //分类字典
+      spendingClassDict: [],      
       //资产列表
       assetList: [],
       modalEditType: 0,
@@ -148,19 +151,21 @@ export default {
         target_id: 0,
         count: 0.01,
         period_type: 0,
-        begin_time: '',
+        begin_time: "",
         is_flexible_spending: false
       },
       datePickerOptions: {
         disabledDate(date) {
-          var today = new Date()
-          var inner = date.valueOf() < Date.now() || date.valueOf() > Date.parse(new Date(today.getFullYear(), 11, 31))
-          var plus = false
-          if(that.modalForm.period_type === 6){
-            plus = date.getDay() === 6 || date.getDay() === 0
+          var today = new Date();
+          var inner =
+            date.valueOf() < Date.now() ||
+            date.valueOf() > Date.parse(new Date(today.getFullYear(), 11, 31));
+          var plus = false;
+          if (that.modalForm.period_type === 6) {
+            plus = date.getDay() === 6 || date.getDay() === 0;
           }
-          if(that.modalForm.period_type === 7){
-            plus = date.getDay() >= 1 && date.getDay() <= 5
+          if (that.modalForm.period_type === 7) {
+            plus = date.getDay() >= 1 && date.getDay() <= 5;
           }
           return inner || plus;
         }
@@ -170,7 +175,8 @@ export default {
           type: "index",
           width: 60,
           align: "center",
-          title: "序号"
+          title: "序号",
+          key: "index"
         },
         {
           title: "计划名称",
@@ -201,6 +207,23 @@ export default {
                 ele => ele && ele.code === params.row.charge_type
               )[0].value
             );
+          }
+        },
+        {
+          title: "支出分类",
+          align: "center",
+          key: "spend_class",
+          render: (h, params) => {
+            if (params.row.charge_type === 1 || params.row.charge_type === 3)
+              return h("span", "——");
+            if (params.row.charge_type === 2)
+              var classify_id = this.$root.$dict.spendingTargetDict.filter(
+                ele => ele && ele.code === params.row.target_id
+              )[0].classify_id;
+            var target = this.spendingClassDict.filter(
+              ele => ele && ele.id === classify_id
+            )[0];
+            return h("span", target ? target.value : "未分类");
           }
         },
         {
@@ -320,6 +343,7 @@ export default {
     };
   },
   mounted() {
+    this.getAllClass()
     this.getAssetList();
     this.getChargeList();
   },
@@ -329,6 +353,13 @@ export default {
     }
   },
   methods: {
+    getAllClass(callback) {
+      getDictClass({ dict_name: "SPENDING_CLASSIFY" }).then(res => {
+        if (res.data.status) {
+          this.spendingClassDict = res.data.data;
+        }
+      });
+    },    
     getAssetList() {
       getAsset().then(res => {
         if (res.data.status) {
@@ -351,7 +382,7 @@ export default {
         target_id: 0,
         count: 0.01,
         period_type: 0,
-        begin_time: '',
+        begin_time: "",
         is_flexible_spending: false
       };
     },
@@ -373,7 +404,7 @@ export default {
         : false;
       if (insertData.charge_type === 2 || insertData.charge_type === 3) {
         insertData.count = -insertData.count;
-      }      
+      }
       upsertRegularCharge(insertData).then(res => {
         if (res.data.status) {
           this.$Message.success(this.modalTitle + "成功！");
@@ -396,7 +427,55 @@ export default {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
     },
-    exportTable(){}
+    exportTable() {
+      var filename = "记账计划";
+      var columns = JSON.parse(JSON.stringify(this.columns));
+      columns.pop();
+      var data = this.data.map((ele, index) => ({
+        ...ele,
+        index: index + 1,
+        begin_time: ele.begin_time.split(" ")[0],
+        op_asset_id: this.assetList.filter(
+          el => el.asset_id === ele.op_asset_id
+        )[0].asset_name,
+        charge_type: this.$root.$dict.chargeTypeDict.filter(
+          el => el && el.code === ele.charge_type
+        )[0].value,
+        spend_class: (() => {
+          if (ele.charge_type === 1 || ele.charge_type === 3) return "——";
+          if (ele.charge_type === 2)
+            var classify_id = this.$root.$dict.spendingTargetDict.filter(
+              el => el && el.code === ele.target_id
+            )[0].classify_id;
+          var target = this.spendingClassDict.filter(
+            el => el && el.id === classify_id
+          )[0];
+          return target ? target.value : "未分类";
+        })(),
+        target_id:
+          (ele.target_id &&
+            ele.charge_type &&
+            {
+              1: () =>
+                this.$root.$dict.earnTargetDict.filter(
+                  el => el && el.code === ele.target_id
+                )[0].value,
+              2: () =>
+                this.$root.$dict.spendingTargetDict.filter(
+                  el => el && el.code === ele.target_id
+                )[0].value,
+              3: () =>
+                this.assetList.filter(el => el.asset_id === ele.target_id)[0]
+                  .asset_name
+            }[ele.charge_type]()) ||
+          "",
+        period_type: this.$root.$dict.periodTypeDict.filter(
+          el => el && el.code === ele.period_type
+        )[0].value,
+        is_flexible_spending: ele.is_flexible_spending ? "弹性" : "固定"
+      }));
+      this.$refs.regularCharge.exportCsv({ filename, columns, data });
+    }
   }
 };
 </script>

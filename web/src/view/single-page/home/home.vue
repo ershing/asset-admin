@@ -15,10 +15,10 @@
         </infor-card>
       </i-col>
     </Row>
-    <Row :gutter="20" style="margin-top: 10px;">
+    <Row :gutter="20" style="margin-top: 10px;" v-if="assetList.length">
       <i-col :md="24" :lg="16" style="margin-bottom: 20px;">
         <Card shadow v-if="pieData.length">
-          <chart-pie style="height: 300px;" :value="pieData" text="资产模块占比"></chart-pie>
+          <chart-pie style="height: 300px;" :value="pieData" text="现今资产模块占比"></chart-pie>
         </Card>
       </i-col>
       <i-col :md="24" :lg="8" style="margin-bottom: 20px;">
@@ -28,7 +28,7 @@
       </i-col>
     </Row>
     <Row>
-      <Card shadow>
+      <Card shadow v-if="assetList.length">
         <asset-overview ref="overview" style="height: 310px;"/>
       </Card>
     </Row>
@@ -59,6 +59,7 @@ export default {
   },
   data() {
     return {
+      assetList: [],
       inforCardData: [
         {
           title: "本月至今资金流(元)",
@@ -95,9 +96,13 @@ export default {
       getAsset().then(res => {
         if (res.data.status) {
           var assetList = res.data.data || [];
+          this.assetList = assetList;
           this.formatTheMap(assetList);
           assetList.forEach(ele => {
-            assetNowProfit({ asset_id: ele.asset_id }).then(res2 => {
+            assetNowProfit({
+              asset_id: ele.asset_id,
+              end_charge_time: Date.parse(new Date())
+            }).then(res2 => {
               if (res2.data.status) {
                 saveProfitList.push({
                   nowProfit: res2.data.data,
@@ -145,6 +150,7 @@ export default {
                           (pre, next) => pre + next.originProfit,
                           0
                         );
+
                         this.inforCardData[2].count =
                           ((totalNow - totalOrigin) * 100) / totalOrigin;
                       }
@@ -182,21 +188,34 @@ export default {
         "#330099"
       ];
       assetData.forEach((ele, index) => {
-        assetTrend({ asset_id: ele.asset_id }).then(res => {
+        assetTrend({
+          asset_id: ele.asset_id,
+          end_charge_time: Date.parse(new Date())
+        }).then(res => {
           if (res.data.status) {
             var monthData = [];
             res.data.data.forEach((ele, ind) => {
               var timeMonth = new Date(ele.time).getMonth() + 1;
+              var countdown = timeMonth - 2;
               if (ind === 0) {
                 monthData[timeMonth - 1] = ele.profit;
-              } else {
-                if (monthData[timeMonth] !== undefined) {
-                  monthData[timeMonth] += ele.profit;
-                } else {
-                  monthData[timeMonth] = ele.profit;
+                while (countdown >= 0) {
+                  monthData[countdown] = ele.profit;
+                  countdown--;
                 }
+              } else {
+                monthData[timeMonth] = ele.profit;
               }
             });
+
+            //补全数据
+            var toMonth = new Date().getMonth() + 1;
+            while (toMonth > 0) {
+              if (!monthData[toMonth]) {
+                monthData[toMonth] = monthData[toMonth - 1];
+              }
+              toMonth--;
+            }
 
             var countBase = 0;
             var baseNum = 0;
@@ -207,7 +226,7 @@ export default {
               } else {
                 if (index === countBase) {
                   baseNum = ele;
-                  return 0;
+                  return 1;
                 } else {
                   return parseFloat((ele / baseNum).toFixed(2));
                 }
@@ -217,15 +236,15 @@ export default {
             series.push({
               name: ele.asset_name,
               type: "line",
-              stack: "总量",
-              areaStyle: {
-                normal: {
-                  color:
-                    index > colors.length - 1
-                      ? colors[colors.length - 1]
-                      : colors[index]
-                }
-              },
+              // stack: "总量",
+              // areaStyle: {
+              //   normal: {
+              //     color:
+              //       index > colors.length - 1
+              //         ? colors[colors.length - 1]
+              //         : colors[index]
+              //   }
+              // },
               data: formatRate
             });
             if (series.length === assetData.length) {
@@ -274,7 +293,7 @@ export default {
         ),
         end_charge_time: Date.parse(today)
       };
-      getFlexibleCount().then(res => {
+      getFlexibleCount(params).then(res => {
         if (res.data.status) {
           this.inforCardData[1].count = res.data.data;
           this.$set(this.barData, today.getMonth() + 1 + "月", res.data.data);

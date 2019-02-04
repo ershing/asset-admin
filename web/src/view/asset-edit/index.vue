@@ -9,11 +9,7 @@
   <div>
     <header class="ctr-header">
       <Button type="success" @click="resetModal();modalEditType = 0;modalVisible = true">新建</Button>
-      <Button
-        style="margin-left:10px;"
-        type="success"
-        @click="exportTable"
-      >导出</Button>
+      <Button style="margin-left:10px;" type="success" @click="exportTable">导出</Button>
     </header>
     <Table :columns="columns" :data="data" ref="assetEdit"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
@@ -113,7 +109,8 @@ export default {
           type: "index",
           width: 60,
           align: "center",
-          title: "序号"
+          title: "序号",
+          key: "index"
         },
         {
           title: "资产名称",
@@ -289,8 +286,23 @@ export default {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
     },
-    exportTable(){
-      this.$refs.assetEdit.exportCsv({filename: 'ce'})
+    exportTable() {
+      var filename = "资产列表";
+      var columns = JSON.parse(JSON.stringify(this.columns));
+      columns.pop();
+      var data = this.data.map((ele, index) => ({
+        ...ele,
+        index: index + 1,
+        create_time: ele.create_time.split(" ")[0],
+        belong_supporter: this.$root.$dict.supporterDict.filter(
+          el => el && el.code === ele.belong_supporter
+        )[0].value,
+        belong_module: this.$root.$dict[
+          ele.is_credit_class ? "creditModuleDict" : "moduleDict"
+        ].filter(el => el && el.code === ele.belong_module)[0].value,
+        is_credit_class: ele.is_credit_class ? "是" : "否"
+      }));
+      this.$refs.assetEdit.exportCsv({ filename, columns, data });
     }
   }
 };

@@ -12,24 +12,37 @@ export default {
       dom: null,
       option: {
         title: {
-          text: "各项资产增长率",
+          text: "各项资产成长情况",
           x: "center"
         },
         tooltip: {
           trigger: "axis",
-          axisPointer: {
-            type: "cross",
-            label: {
-              backgroundColor: "#6a7985"
+          formatter: function(params, ticket, callback) {
+            var res = params[0].name;
+            for (var i = 0, l = params.length; i < l; i++) {
+              res +=
+                "<br/>" +
+                params[i].seriesName +
+                " : " +
+                params[i].value * 100 +
+                "%";
             }
+            return res;
           }
         },
+        legend: {
+          data: []
+        },
         grid: {
-          top: "3%",
-          left: "1.2%",
-          right: "1%",
+          left: "3%",
+          right: "4%",
           bottom: "3%",
           containLabel: true
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
         },
         xAxis: [
           {

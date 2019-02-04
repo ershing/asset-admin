@@ -13,7 +13,8 @@ export default {
       option: {
         title: {
           text: "各项资产增长情况",
-          x: "center"
+          x: "left",
+          y: "top"
         },
         tooltip: {
           trigger: "axis",
@@ -22,10 +23,25 @@ export default {
             label: {
               backgroundColor: "#6a7985"
             }
+          },
+          formatter: function(params, ticket, callback) {
+            var res = params[0].name;
+            for (var i = 0, l = params.length; i < l; i++) {
+              res +=
+                "<br/>" +
+                params[i].seriesName +
+                " : " +
+                params[i].value +
+                "元";
+            }
+            return res;
           }
         },
+        legend: {
+          data: []
+        },
         grid: {
-          top: "3%",
+          top: "10%",
           left: "1.2%",
           right: "1%",
           bottom: "3%",

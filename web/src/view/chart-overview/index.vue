@@ -207,7 +207,7 @@ export default {
               trigger: "item",
               formatter: "{a} <br/>{b} : {c}元（{d}%）"
             },
-            center: [160, 160],
+            center: byTheType === 1 ? ['80%', '20%'] : ['80%', '80%'],
             radius: [0, 50],
             itemStyle: {
               normal: {

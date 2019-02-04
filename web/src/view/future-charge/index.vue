@@ -30,7 +30,7 @@
         :page-size-opts="[5, 10, 15, 30]"
       />
     </header>
-    <Table :columns="columns" :data="data"></Table>
+    <Table ref="futureCharge" :columns="columns" :data="data"></Table>
     <Modal v-draggable="options" v-model="modalVisible" :title="modalTitle" @on-ok="confirmModal">
       <Form :model="modalForm" :label-width="80">
         <FormItem label="操作资产">
@@ -91,7 +91,13 @@
 </template>
 
 <script>
-import { getAsset, getCharge, upsertCharge, deleteCharge, getDictClass  } from "@/api/base";
+import {
+  getAsset,
+  getCharge,
+  upsertCharge,
+  deleteCharge,
+  getDictClass
+} from "@/api/base";
 export default {
   name: "AssetEdit",
   data() {
@@ -144,7 +150,8 @@ export default {
           type: "index",
           width: 60,
           align: "center",
-          title: "序号"
+          title: "序号",
+          key: "index"
         },
         {
           title: "操作资产",
@@ -153,9 +160,11 @@ export default {
           render: (h, params) => {
             return h(
               "span",
-              this.assetList.filter(
-                ele => ele.asset_id === params.row.op_asset_id
-              )[0].asset_name
+              (this.assetList.length &&
+                this.assetList.filter(
+                  ele => ele && ele.asset_id === params.row.op_asset_id
+                )[0].asset_name) ||
+                ""
             );
           }
         },
@@ -175,7 +184,7 @@ export default {
         {
           title: "支出分类",
           align: "center",
-          // key: "count",
+          key: "spend_class",
           render: (h, params) => {
             if (params.row.charge_type === 1 || params.row.charge_type === 3)
               return h("span", "——");
@@ -208,9 +217,11 @@ export default {
                       ele => ele && ele.code === params.row.target_id
                     )[0].value,
                   3: () =>
-                    this.assetList.filter(
-                      ele => ele.asset_id === params.row.target_id
-                    )[0].asset_name
+                    (this.assetList.length &&
+                      this.assetList.filter(
+                        ele => ele && ele.asset_id === params.row.target_id
+                      )[0].asset_name) ||
+                    ""
                 }[params.row.charge_type]()) ||
                 ""
             );
@@ -416,7 +427,52 @@ export default {
       this.confirmDeleteVisible = true;
       this.deleteParams = params;
     },
-    exportTable(){}
+    exportTable() {
+      var filename = "未来账单";
+      var columns = JSON.parse(JSON.stringify(this.columns));
+      columns.pop();
+      var data = this.data.map((ele, index) => ({
+        ...ele,
+        index: index + 1,
+        charge_time: ele.charge_time.split(" ")[0],
+        op_asset_id: this.assetList.filter(
+          el => el.asset_id === ele.op_asset_id
+        )[0].asset_name,
+        charge_type: this.$root.$dict.chargeTypeDict.filter(
+          el => el && el.code === ele.charge_type
+        )[0].value,
+        spend_class: (() => {
+          if (ele.charge_type === 1 || ele.charge_type === 3) return "——";
+          if (ele.charge_type === 2)
+            var classify_id = this.$root.$dict.spendingTargetDict.filter(
+              el => el && el.code === ele.target_id
+            )[0].classify_id;
+          var target = this.spendingClassDict.filter(
+            el => el && el.id === classify_id
+          )[0];
+          return target ? target.value : "未分类";
+        })(),
+        target_id:
+          (ele.target_id &&
+            ele.charge_type &&
+            {
+              1: () =>
+                this.$root.$dict.earnTargetDict.filter(
+                  el => el && el.code === ele.target_id
+                )[0].value,
+              2: () =>
+                this.$root.$dict.spendingTargetDict.filter(
+                  el => el && el.code === ele.target_id
+                )[0].value,
+              3: () =>
+                this.assetList.filter(el => el.asset_id === ele.target_id)[0]
+                  .asset_name
+            }[ele.charge_type]()) ||
+          "",
+        is_flexible_spending: ele.is_flexible_spending ? "弹性" : "固定"
+      }));
+      this.$refs.futureCharge.exportCsv({ filename, columns, data });
+    }
   }
 };
 </script>
