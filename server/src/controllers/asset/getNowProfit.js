@@ -4,20 +4,31 @@ const moment = require('moment');
 var async = require('async');
 
 module.exports = (req, res) => {
-  if (!req.query.asset_id) {
-    return res.send({
-      status: 0,
-      msg: '参数错误'
-    });
+  var searchData = {
+    asset_id,
+    end_charge_time,
+  } = req.query
+  for (let key in searchData) {
+    if (searchData[key] === undefined || searchData[key] === null || searchData[key] === '' || searchData[key] === 0)
+      return res.send({
+        status: 0,
+        msg: '参数错误'
+      })
   }
 
   var year = (new Date()).getFullYear()
   if (req.query.year) {
     year = req.query.year
   }
+
+
+
   var yearStart = Date.parse(new Date(year, 0, 1));
   var yearEnd = Date.parse(new Date(Number(year) + 1, 0, 1)) - 1000;
+  var start_charge_time = req.query.start_charge_time || yearStart
 
+  var searchStartTime = Number(start_charge_time) > yearStart ? Number(start_charge_time) : yearStart
+  var searchEndTime = Number(end_charge_time) < yearEnd ? Number(end_charge_time) : yearEnd
 
   async.parallel([
     checkAssetBase,
@@ -56,8 +67,9 @@ module.exports = (req, res) => {
   function getChargeList(callback) {
     charge.findAll({
       where: {
+        is_plan: 0,
         is_delete: 0,
-        charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() },
+        charge_time: { $gte: moment(searchStartTime).format(), $lte: moment(searchEndTime).format() },
         $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }]
       },
       order: [['charge_time', 'ASC']],
@@ -71,12 +83,12 @@ module.exports = (req, res) => {
   function findTargetIndex(list, create_time) {
     var findIndex = 0;
     var parseTime = new Date(create_time)
-    if (!list.length || parseTime < new Date(list[0])) {
+    if (!list.length || parseTime <= new Date(list[0].charge_time)) {
       return -1;
     }
     list.some((ele, index) => {
       if (index !== list.length - 1) {
-        if (new Date(list[index].charge_time) <= parseTime && parseTime < new Date(list[index + 1].charge_time)) {
+        if (new Date(list[index].charge_time) <= parseTime && parseTime <= new Date(list[index + 1].charge_time)) {
           findIndex = index
           return true;
         }

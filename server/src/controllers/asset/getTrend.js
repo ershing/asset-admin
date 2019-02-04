@@ -4,20 +4,28 @@ const moment = require('moment');
 var async = require('async');
 
 module.exports = (req, res) => {
-  if (!req.query.asset_id) {
-    return res.send({
-      status: 0,
-      msg: '参数错误'
-    });
+  var searchData = {
+    asset_id,
+    end_charge_time,
+  } = req.query
+  for (let key in searchData) {
+    if (searchData[key] === undefined || searchData[key] === null || searchData[key] === '' || searchData[key] === 0)
+      return res.send({
+        status: 0,
+        msg: '参数错误'
+      })
   }
-
   var year = (new Date()).getFullYear()
   if (req.query.year) {
     year = req.query.year
   }
+
   var yearStart = Date.parse(new Date(year, 0, 1));
   var yearEnd = Date.parse(new Date(Number(year) + 1, 0, 1)) - 1000;
 
+  var start_charge_time = req.query.start_charge_time || yearStart
+  var searchStartTime = Number(start_charge_time) > yearStart ? Number(start_charge_time) : yearStart
+  var searchEndTime = Number(end_charge_time) < yearEnd ? Number(end_charge_time) : yearEnd
 
   async.parallel([
     checkAssetBase,
@@ -55,7 +63,11 @@ module.exports = (req, res) => {
 
   function getChargeList(callback) {
     charge.findAll({
-      where: { is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }] },
+      where: {
+        is_plan: 0,
+        is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }],
+        charge_time: { $gte: moment(searchStartTime).format(), $lte: moment(searchEndTime).format() }
+      },
       order: [['charge_time', 'ASC']],
     }).then(data => {
       callback(null, data)
@@ -67,12 +79,12 @@ module.exports = (req, res) => {
   function findTargetIndex(list, create_time) {
     var findIndex = 0;
     var parseTime = new Date(create_time)
-    if (!list.length || parseTime < new Date(list[0])) {
+    if (!list.length || parseTime <= new Date(list[0].charge_time)) {
       return -1;
     }
     list.some((ele, index) => {
       if (index !== list.length - 1) {
-        if (new Date(list[index].charge_time) <= parseTime && parseTime < new Date(list[index + 1].charge_time)) {
+        if (new Date(list[index].charge_time) <= parseTime && parseTime <= new Date(list[index + 1].charge_time)) {
           findIndex = index
           return true;
         }
@@ -109,6 +121,9 @@ module.exports = (req, res) => {
     var findIndex = findTargetIndex(charList, target.create_time)
     var getMoveDistance = findIndex === -1 ? target.profit : target.profit - charList[findIndex].count
     var assetHistoryList = getBaseTrendByCharge(charList).map(ele => ({ ...ele, profit: parseFloat((ele.profit + getMoveDistance).toFixed(2)) }))
+    if (findIndex === -1) {
+      assetHistoryList.unshift({ time: target.create_time, profit: target.profit })
+    }
     return res.send({
       status: 1,
       data: assetHistoryList

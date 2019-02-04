@@ -56,6 +56,7 @@ module.exports = (req, res) => {
     function getChargeList(callback) {
         charge.findAll({
             where: {
+                is_plan: 0,
                 is_delete: 0,
                 charge_time: { $gte: moment(yearStart).format(), $lte: moment(yearEnd).format() },
                 $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }]
@@ -71,12 +72,12 @@ module.exports = (req, res) => {
     function findTargetIndex(list, create_time) {
         var findIndex = 0;
         var parseTime = new Date(create_time)
-        if (!list.length || parseTime < new Date(list[0])) {
+        if (!list.length || parseTime <= new Date(list[0].charge_time)) {
             return -1;
         }
         list.some((ele, index) => {
             if (index !== list.length - 1) {
-                if (new Date(list[index].charge_time) <= parseTime && parseTime < new Date(list[index + 1].charge_time)) {
+                if (new Date(list[index].charge_time) <= parseTime && parseTime <= new Date(list[index + 1].charge_time)) {
                     findIndex = index
                     return true;
                 }
