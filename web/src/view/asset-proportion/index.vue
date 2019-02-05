@@ -110,6 +110,18 @@ export default {
                               formatSaveProfitList.forEach((ele, index) => {
                                 if (ele && ele.length) {
                                   if (
+                                    !this.$root.$dict.moduleDict.filter(
+                                      el => el && el.code === index
+                                    )[0].classify_id
+                                  ) {
+                                    if (classFormatList[0]) {
+                                      classFormatList[0].push(ele);
+                                    } else {
+                                      classFormatList[0] = [ele];
+                                    }
+                                    return;
+                                  }
+                                  if (
                                     !classFormatList[
                                       ModuleClassDict.filter(
                                         md =>
@@ -154,9 +166,12 @@ export default {
                                   });
                                   this.pieData.push({
                                     value,
-                                    name: ModuleClassDict.filter(
-                                      el => el && el.code === ind
-                                    )[0].value
+                                    name:
+                                      ind === 0
+                                        ? "其他未分类"
+                                        : ModuleClassDict.filter(
+                                            el => el && el.code === ind
+                                          )[0].value
                                   });
                                 }
                               });
@@ -164,14 +179,6 @@ export default {
                           }
                         );
 
-                        // var totalNow = saveProfitList.reduce(
-                        //   (pre, next) => pre + next.nowProfit,
-                        //   0
-                        // );
-                        // var totalOrigin = saveProfitList.reduce(
-                        //   (pre, next) => pre + next.originProfit,
-                        //   0
-                        // );
                       }
                     });
                   });
@@ -250,7 +257,7 @@ export default {
               // },
               data: monthData
             });
-            this.$refs.overviews.option.legend.data.push(ele.asset_name)
+            this.$refs.overviews.option.legend.data.push(ele.asset_name);
             if (series.length === assetData.length) {
               this.$refs.overviews.option.series = series;
               this.$refs.overviews.loadMap();

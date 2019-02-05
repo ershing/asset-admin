@@ -65,7 +65,7 @@ module.exports = (req, res) => {
     charge.findAll({
       where: {
         is_plan: 0,
-        is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }],
+        is_delete: 0, $or: [{ op_asset_id: req.query.asset_id }],
         charge_time: { $gte: moment(searchStartTime).format(), $lte: moment(searchEndTime).format() }
       },
       order: [['charge_time', 'ASC']],

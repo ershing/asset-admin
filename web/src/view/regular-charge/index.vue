@@ -33,7 +33,7 @@
             @on-change="modalForm.target_id = 0;"
           >
             <Option
-              v-for="ele of $root.$dict.chargeTypeDict.filter(ele => ele)"
+              v-for="ele of $root.$dict.chargeTypeDict.filter(ele => ele && ele.code !== 4)"
               :key="ele.code"
               :value="ele.code"
             >{{ele.value}}</Option>

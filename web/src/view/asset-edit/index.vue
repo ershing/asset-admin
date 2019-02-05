@@ -231,7 +231,7 @@ export default {
         if (res.data.status) {
           var count = 0;
           res.data.data.forEach(ele => {
-            assetNowProfit({ asset_id: ele.asset_id }).then(res2 => {
+            assetNowProfit({ asset_id: ele.asset_id, end_charge_time: Date.parse(new Date()) }).then(res2 => {
               if (res2.data.status) {
                 ele.now_profit = res2.data.data;
                 count++;

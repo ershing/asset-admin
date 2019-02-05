@@ -21,8 +21,23 @@ module.exports = (req, res) => {
     }
     addData.create_time = Date.parse(new Date());
     addData.charge_id = req.body.charge_id || uuid();
-    addData.account_id =  req.body.charge_id || uuid();
+    addData.account_id = req.body.charge_id || uuid();
     charge.upsert(addData).then(data => {
+        if (addData.charge_type == 3) {
+            var newInsert = JSON.parse(JSON.stringify(addData))
+            newInsert.charge_id = uuid()
+            newInsert.charge_type = 4
+            var temp = newInsert.op_asset_id
+            newInsert.op_asset_id = newInsert.target_id
+            newInsert.target_id = temp
+            newInsert.count = -newInsert.count
+            charge.upsert(newInsert).then(data => {
+                res.send({
+                    status: 1
+                })
+            })
+            return;
+        }
         res.send({
             status: 1
         })

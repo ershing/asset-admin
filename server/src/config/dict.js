@@ -75,7 +75,8 @@ const spendingTargetDict = [
 const chargeTypeDict = [
   { code: 1, value: '收入' },
   { code: 2, value: '支出' },
-  { code: 3, value: '内部转账出' }
+  { code: 3, value: '内部转账出' },
+  { code: 4, value: '内部转账入' }
 ]
 
 //不能改，整个依赖

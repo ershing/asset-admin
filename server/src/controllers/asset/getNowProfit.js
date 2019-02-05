@@ -70,7 +70,7 @@ module.exports = (req, res) => {
         is_plan: 0,
         is_delete: 0,
         charge_time: { $gte: moment(searchStartTime).format(), $lte: moment(searchEndTime).format() },
-        $or: [{ op_asset_id: req.query.asset_id }, { target_id: req.query.asset_id }]
+        $or: [{ op_asset_id: req.query.asset_id }]
       },
       order: [['charge_time', 'ASC']],
     }).then(data => {
