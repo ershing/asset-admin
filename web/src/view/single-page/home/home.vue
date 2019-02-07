@@ -228,6 +228,7 @@ export default {
                   baseNum = ele <= 0 ? ele / 1000 : ele;
                   return baseNum <= 0 ? baseNum : 1;
                 } else {
+                  console.log('heyjack',parseFloat((ele / baseNum).toFixed(2)))
                   return baseNum <= 0
                     ? parseFloat((ele / 1000).toFixed(2))
                     : parseFloat((ele / baseNum).toFixed(2));

@@ -119,10 +119,17 @@ module.exports = (req, res) => {
     var target = results[0]
     var charList = results[1]
     var findIndex = findTargetIndex(charList, target.create_time)
-    var getMoveDistance = findIndex === -1 ? target.profit : target.profit - charList[findIndex].count
-    var assetHistoryList = getBaseTrendByCharge(charList).map(ele => ({ ...ele, profit: parseFloat((ele.profit + getMoveDistance).toFixed(2)) }))
+    var baseTrendCreate = getBaseTrendByCharge(charList)
+    var getMoveDistance = findIndex === -1 ? target.profit : target.profit - baseTrendCreate[findIndex].profit
+    var assetHistoryList = baseTrendCreate.map(ele => ({ ...ele, profit: parseFloat((ele.profit + getMoveDistance).toFixed(2)) }))
+
     if (findIndex === -1) {
       assetHistoryList.unshift({ time: target.create_time, profit: target.profit })
+    } else {
+      if (charList.length) {
+        var baser = assetHistoryList[0].profit
+        assetHistoryList.unshift({ time: charList[0].charge_time, profit: baser - charList[0].count })
+      }
     }
     return res.send({
       status: 1,

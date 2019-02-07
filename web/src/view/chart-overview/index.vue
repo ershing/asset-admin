@@ -1,7 +1,11 @@
 <template>
   <div>
     <div style="margin-bottom:10px;overflow:hidden;">
-      <Select v-model="chooseGetMonth" style="float: right;width: 200px" @on-change="changeMonth(1)">
+      <Select
+        v-model="chooseGetMonth"
+        style="float: right;width: 200px"
+        @on-change="changeMonth(1)"
+      >
         <Option v-for="ele of countMonths" :key="ele.key" :value="ele.key">{{ele.value}}</Option>
       </Select>
     </div>
@@ -11,7 +15,11 @@
       </Card>
     </Row>
     <div style="margin:20px 0 10px;overflow:hidden;">
-      <Select v-model="chooseSpendMonth" style="float: right;width: 200px" @on-change="changeMonth(2)">
+      <Select
+        v-model="chooseSpendMonth"
+        style="float: right;width: 200px"
+        @on-change="changeMonth(2)"
+      >
         <Option v-for="ele of countMonths" :key="ele.key" :value="ele.key">{{ele.value}}</Option>
       </Select>
     </div>
@@ -46,6 +54,8 @@ export default {
           );
         }
       },
+      initGet: false,
+      initSpend: false,
       getOption: {
         title: {
           text: "月收入概览",
@@ -159,6 +169,10 @@ export default {
           var earnTargets = data.map(ele => ele.target_id);
           var uniqueEarnTargets = [...new Set(earnTargets)];
           this[targetOption].series = [];
+          this[targetOption].legend.data = [];
+          if (!res.data.data.length) {
+            return byTheType === 1 ? this.buildGetMap() : this.buildSpendMap();
+          }
           var days = new Date(year, month + 1, 0).getDate();
           this[targetOption].legend.data = uniqueEarnTargets.map(ele => {
             var name = this.$root.$dict[
@@ -207,7 +221,7 @@ export default {
               trigger: "item",
               formatter: "{a} <br/>{b} : {c}元（{d}%）"
             },
-            center: byTheType === 1 ? ['80%', '20%'] : ['80%', '80%'],
+            center: byTheType === 1 ? ["80%", "20%"] : ["80%", "80%"],
             radius: [0, 50],
             itemStyle: {
               normal: {
@@ -229,17 +243,27 @@ export default {
       this.getBase(2);
     },
     buildGetMap() {
-      this.dom = echarts.init(this.$refs["chart-get-overview"]);
-      this.dom.setOption(this.getOption);
-      on(window, "resize", this.resize);
+      if (!this.initGet) {
+        this.dom = echarts.init(this.$refs["chart-get-overview"]);
+      }
+      this.dom.setOption(this.getOption, true);
+      if (!this.initGet) {
+        on(window, "resize", this.resize);
+        this.initGet = true;
+      }
     },
     buildSpendMap() {
-      this.spendDom = echarts.init(this.$refs["chart-spend-overview"]);
-      this.spendDom.setOption(this.spendOption);
-      on(window, "resize", this.resize);
+      if (!this.initSpend) {
+        this.spendDom = echarts.init(this.$refs["chart-spend-overview"]);
+      }
+      this.spendDom.setOption(this.spendOption, true);
+      if (!this.initSpend) {
+        on(window, "resize", this.resize);
+        this.initSpend = true;
+      }
     },
-    changeMonth(val){
-      this.getBase(val)
+    changeMonth(val) {
+      this.getBase(val);
     }
   },
   mounted() {

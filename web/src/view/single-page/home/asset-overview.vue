@@ -24,7 +24,7 @@ export default {
                 "<br/>" +
                 params[i].seriesName +
                 " : " +
-                params[i].value * 100 +
+                (params[i].value * 100).toFixed(0) +
                 "%";
             }
             return res;
